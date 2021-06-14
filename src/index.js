@@ -48,8 +48,11 @@ function fillPolyData() {
 	points[7] = 0;
 	points[8] = 0;
 
+	points[9] = 0;
+	points[10] = -1;
+	points[11] = -1;
 
-	var cells = Uint8Array.from([3, 0, 1, 2]);
+	var cells = Uint8Array.from([4, 0, 1, 2, 3]);
 
 	polyData.getPoints().setData(points, 3);
   polyData.getPolys().setData(cells, 1);
@@ -69,6 +72,7 @@ mapper.setInputData(polyData);
 
 
 const actor = vtkActor.newInstance();
+
 actor.getProperty().setRepresentation(Representation.WIREFRAME);
 
 actor.setMapper(mapper);
