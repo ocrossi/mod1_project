@@ -6,14 +6,14 @@ import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreen
 import vtkActor           from '@kitware/vtk.js/Rendering/Core/Actor';
 import vtkMapper          from '@kitware/vtk.js/Rendering/Core/Mapper';
 import vtkCalculator      from '@kitware/vtk.js/Filters/General/Calculator';
-//import { AttributeTypes } from '@kitware/vtk.js/Common/DataModel/DataSetAttributes/Constants';
-//import { FieldDataTypes } from '@kitware/vtk.js/Common/DataModel/DataSet/Constants';
 
 import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData.js'
 
 
 import vtkPlaneSource from '@kitware/vtk.js/Filters/Sources/PlaneSource';
 import { Representation } from '@kitware/vtk.js/Rendering/Core/Property/Constants';
+
+//import controlPanel from './controlPanel.html';
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -27,16 +27,23 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // Example code
 // ----------------------------------------------------------------------------
 
-// const planeSource = vtkPlaneSource.newInstance();
-
-const SIZE_MAP_X = 3;
-const SIZE_MAP_Y = 3;
+const SIZE_MAP_X = 5;
+const SIZE_MAP_Y = 5;
 const SIZE_MAP_Z = 0;
 
 const polyData  = vtkPolyData.newInstance();
 
-// place les points
-function calc_map() {
+function parse_input() {
+	
+}
+
+function calc_map_size() {
+	
+}
+
+
+// for now generates flat squared map
+function generate_map() {
 	let nbPoints = (SIZE_MAP_X + 1) * (SIZE_MAP_Y + 1);
 	let numTriangles = SIZE_MAP_X * SIZE_MAP_Y * 2;
 
@@ -47,6 +54,7 @@ function calc_map() {
 	polyData.getPolys().setData(polys, 1);
 
 	// TO DO : set normals?
+	
 	let idx = 0;
 	for (let i = 0; i <= SIZE_MAP_X; i++) {
 		for (let j = 0; j <= SIZE_MAP_Y; j++) {
@@ -58,83 +66,57 @@ function calc_map() {
 	}
 
 	idx = 0;
-	/*
-	for (let k = 0; k < SIZE_MAP_X; k++) {
-		for (let l = 0; l < SIZE_MAP_Y; l++) {
-			polys[idx * 4] = 3;
-			polys[idx * 4 + 1] = k + l * (SIZE_MAP_X + 1); // ref point for triangle
-			polys[idx * 4 + 2] = 
-				(k + l % 2 === 0)?
-				polys[idx * 4 + 1] + 1 : //	right point in grid
-				polys[idx * 4 + 1] + SIZE_MAP_X + 1; // 1 row below point in grid
-			polys[idx * 4 + 3] = 
-				(k + l % 2 === 0)?
-				polys[idx * 4 + 1] + SIZE_MAP_X + 1 :// 1 row below point in grid
-				polys[idx * 4 + 1] + SIZE_MAP_X - 1 ;// one point below & 1 left in grid
-
-			idx++;
-		}
-	}
-	*/
 
 	for (let k = 0; k < SIZE_MAP_X; k++) {
-		for (let l = 0; l < SIZE_MAP_Y; l++) {
-			polys[idx * 4] = 3;
-			polys[idx * 4 + 1] = k * (SIZE_MAP_X) + l; // ref point for triangle
-			polys[idx * 4 + 2] = 
-				(k + l % 2 === 0)?
-				polys[idx * 4 + 1] + 1 : //	right point in grid
-				polys[idx * 4 + 1] + SIZE_MAP_X; // 1 row below point in grid
-			polys[idx * 4 + 3] = 
-				(k + l % 2 === 0)?
-				polys[idx * 4 + 1] + SIZE_MAP_X:// 1 row below point in grid
-				polys[idx * 4 + 1] + SIZE_MAP_X - 1;// one point below & 1 left in grid
+		for (let l = 0; l < SIZE_MAP_Y; l++) {	
+			polys[idx * 8] = 3;
+			polys[idx * 8 + 1] = k * (SIZE_MAP_X + 1) + l; // ref
+			polys[idx * 8 + 2] = polys[idx * 8 + 1] + 1; // down
+			polys[idx * 8 + 3] = polys[idx * 8 + 1] + (SIZE_MAP_X + 1); // right
 
+			polys[idx * 8 + 4] = 3;
+			polys[idx * 8 + 5] = polys[idx * 8 + 2];
+			polys[idx * 8 + 6] = polys[idx * 8 + 3]; 
+			polys[idx * 8 + 7] = polys[idx * 8 + 3] + 1; 
 			idx++;
 		}
 	}
 }
 
-function create_triangle() {
-	var nbPoints = 4 * 1;
-	var points = new Float32Array(nbPoints * 3);
+generate_map();
 
+// -----------------------------------------------------------
+// UI control handling
+// -----------------------------------------------------------
+/*
+fullScreenRenderer.addController(controlPanel);
 
-	points[0] = 0;
-	points[1] = 0;
-	points[2] = 0;
-
-	points[3] = 1;
-	points[4] = 1;
-	points[5] = 0;
-
-	points[6] = 1;
-	points[7] = 0;
-	points[8] = 0;
-
-	points[9] = 0;
-	points[10] = -1;
-	points[11] = -1;
-
-	var cells = Uint8Array.from([4, 0, 1, 2, 3]);
-
-	polyData.getPoints().setData(points, 3);
-  polyData.getPolys().setData(cells, 1);
+function read_input() {
+	const reader = new FileReader();
+	reader.onload = function() {
+		console.log(reader.result);
+	}
+	reader.readAsText(input.files[0]);
 }
 
-calc_map();
 
 
+const input = document.querySelector('input[type="file"]');
+input.addEventListener('change', (e) => {
+	console.log(input.files);
+	reader.onload = () => console.log(reader.result);
+}, false);
+*/
+// ----------------------------------------------------------------------------
+// Display output
+// ----------------------------------------------------------------------------
 
 const mapper = vtkMapper.newInstance();
-//mapper.setInputConnection(planeSource.getOutputPort());
-
 mapper.setInputData(polyData);
 
 
 
 const actor = vtkActor.newInstance();
-
 actor.getProperty().setRepresentation(Representation.WIREFRAME);
 
 actor.setMapper(mapper);
@@ -148,5 +130,3 @@ global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;
 global.renderer = renderer;
 global.polyData = polyData;
-global.planeSource = planeSource;
-console.log("hoho");
