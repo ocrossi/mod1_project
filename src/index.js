@@ -13,7 +13,8 @@ import vtkPolyData from '@kitware/vtk.js/Common/DataModel/PolyData.js'
 import vtkPlaneSource from '@kitware/vtk.js/Filters/Sources/PlaneSource';
 import { Representation } from '@kitware/vtk.js/Rendering/Core/Property/Constants';
 
-//import controlPanel from './controlPanel.html';
+import inputFile from 'raw-loader!../resources/demo1.mod1';
+import controlPanel from './controlPanel.html';
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -27,14 +28,26 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // Example code
 // ----------------------------------------------------------------------------
 
-const SIZE_MAP_X = 5;
-const SIZE_MAP_Y = 5;
+const SIZE_MAP_X = 8;
+const SIZE_MAP_Y = 8;
 const SIZE_MAP_Z = 0;
 
 const polyData  = vtkPolyData.newInstance();
 
+var inputName = 'demo1';
+
+async function importModule() {
+
+  import(`raw-loader!../resources/${inputName}.mod1`).then((test) => {
+    console.log("Loaded");
+		console.log(test.default);
+  }, (err)=>{
+    console.log("Error", err)
+  })
+}
+
 function parse_input() {
-	
+	console.log('input|', inputFile, '|EOI');
 }
 
 function calc_map_size() {
@@ -83,12 +96,25 @@ function generate_map() {
 	}
 }
 
-generate_map();
+function main() {
+	/* tests */
+
+	importModule();
+	console.log('1');
+
+	/* code */
+	generate_map();
+	parse_input();
+	console.log('2');
+
+}
+
+main();
 
 // -----------------------------------------------------------
 // UI control handling
 // -----------------------------------------------------------
-/*
+
 fullScreenRenderer.addController(controlPanel);
 
 function read_input() {
@@ -106,7 +132,7 @@ input.addEventListener('change', (e) => {
 	console.log(input.files);
 	reader.onload = () => console.log(reader.result);
 }, false);
-*/
+
 // ----------------------------------------------------------------------------
 // Display output
 // ----------------------------------------------------------------------------
