@@ -34,7 +34,7 @@ function get_overlap(mapData) {
 // adds biggest overlap to every x,y point coordinates
 function compute_overlap(mapData) {
 	let overlap = get_overlap(mapData);
-
+	console.log('in compute overlap', overlap);
 	for (let i = 0; i < mapData.points.length; i++) {
 		mapData.points[i][0] += overlap;
 		mapData.points[i][1] += overlap;
@@ -61,11 +61,13 @@ function get_farthest_corner(mapData) {
 function mapCoords_to_worldCoords(mapData) {
 	let farthest = get_farthest_corner(mapData);
 
+	console.log("map coords to world coords farthest : ", farthest);
 	mapData.size_multiplier = mapData.size_map / farthest;
 }
 
 function resize_map(mapData) {
-	sort_input_tab
+	console.log('hello');
+	sort_input_tab(mapData);
 	compute_overlap(mapData);
 	mapCoords_to_worldCoords(mapData);
 
