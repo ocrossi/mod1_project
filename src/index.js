@@ -11,12 +11,11 @@ import { Representation } from "@kitware/vtk.js/Rendering/Core/Property/Constant
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo1.mod1";
-//import inputFile from "raw-loader!../errors_resource/demo1.mod1";
+import inputFile from "raw-loader!../resources/demo5.mod1";
 
 import parse_input from "./parsing.js";
-import resize_map from "./resizeMap.js";
 import generate_map from "./generateMap.js";
+import set_size_map from "./setMap.js";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -35,7 +34,9 @@ const polyData = vtkPolyData.newInstance();
 
 function main() {
 	let mapData = {
-		size_map: 10,
+		size_map: 0,
+		bounds_multiplier: 1,
+		size_multiplier: 1,
 		size_max: 1000000000,
 		points: new Array(),
 		input: "",
@@ -46,7 +47,7 @@ function main() {
 		console.error("input parsing failure");
 		return;
 	}
-	resize_map(mapData);
+	set_size_map(mapData);
 	generate_map(mapData, polyData);
 }
 
@@ -84,7 +85,7 @@ const mapper = vtkMapper.newInstance();
 mapper.setInputData(polyData);
 
 const actor = vtkActor.newInstance();
-actor.getProperty().setRepresentation(Representation.WIREFRAME);
+// actor.getProperty().setRepresentation(Representation.WIREFRAME);
 
 actor.setMapper(mapper);
 
