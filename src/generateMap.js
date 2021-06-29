@@ -15,10 +15,9 @@ function place_input_points(mapData, points) {
 	}
 }
 
-let brushFallOff = 0.1;
+let brushFallOff = 0.15;
 
 function raise_terrain(mapData, index, points) {
-	console.log(mapData);
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
@@ -26,18 +25,24 @@ function raise_terrain(mapData, index, points) {
 	let deltaHeight = targetHeight - points[get_poly_index(index, mapData) + 2];
 	let sqrRadius = Math.pow(radius, 2);
 
-	for (let offsetY = -radius; offsetY <= radius; offsetY++){
+	let test = 0;
+	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
+		let test2 = 0;
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
 			if (sqrDstFromCenter <= sqrRadius) {
 				let dstFromCenter = Math.sqrt(sqrDstFromCenter);
 				let t = dstFromCenter / radius;
-				let brushWeight = Math.exp(-t * t / brushFallOff);
+				let brushWeight = Math.exp((-t * t) / brushFallOff);
 
 				let brushX = centreX + offsetX;
 				let brushY = centreY + offsetY;
 
-				points[3 * (brushX * (mapData.size_map + 1) + brushY) + 2] = deltaHeight * brushWeight;
+				let z_coord = 3 * (brushX * (mapData.size_map + 1) + brushY) + 2;
+				let newHeight = deltaHeight * brushWeight;
+				if (points[z_coord] < newHeight) {
+					points[z_coord] = (points[z_coord] + newHeight) / 2;
+				}
 			}
 		}
 	}
@@ -64,9 +69,9 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
-	//console.log(mapData.points);
+	console.log(mapData.points);
 	for (let i = 0; i < mapData.points.length; i++) {
-		raise_terrain(mapData, i, points);
+		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
 	}
 	//place_input_points(mapData, points);
 	idx = 0;
