@@ -24,6 +24,7 @@ import inputFile from "raw-loader!../resources/demo5.mod1";
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
 import set_size_map from "./setMap.js";
+import add_points from "./addPoints.js";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -58,6 +59,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
+	add_points(mapData);
 	generate_map(mapData, polyData);
 }
 
@@ -139,6 +141,7 @@ const outlineActor = vtkActor.newInstance();
 
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
 outlineActor.setMapper(outlineMapper);
+
 
 
 renderer.addActor(actor);

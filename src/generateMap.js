@@ -41,7 +41,6 @@ function get_max_height(mapData) {
 			mapData.max_height = mapData.points[i][2];
 	}
 }
-
 function generate_map(mapData, polyData) {
 	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
 	let numTriangles = mapData.size_map * mapData.size_map * 2;
@@ -63,6 +62,7 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
+	
 	// elevates terrain with input points
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
