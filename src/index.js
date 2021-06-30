@@ -10,7 +10,8 @@ import { Representation } from "@kitware/vtk.js/Rendering/Core/Property/Constant
 
 import vtkCalculator from "@kitware/vtk.js/Filters/General/Calculator";
 import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
-import { AttributeTypes } from '@kitware/vtk.js/Common/DataModel/DataSetAttributes/Constants';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import { AttributeTypes } from "@kitware/vtk.js/Common/DataModel/DataSetAttributes/Constants";
 import vtkLookupTable from "@kitware/vtk.js/Common/Core/LookupTable";
 import vtkDataSet from "@kitware/vtk.js/Common/DataModel/DataSet";
 const { ColorMode, ScalarMode } = vtkMapper;
@@ -37,13 +38,12 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // ----------------------------------------------------------------------------
 
 const polyData = vtkPolyData.newInstance();
-//const ctfun = vtkColorTransferFunction.newInstance();
-//ctfun.addRGBPoint(200.0, 1.0, 1.0, 1.0);
-//ctfun.addRGBPoint(2000.0, 0.0, 0.0, 0.0);
 
 let mapData = {
 	size_map: 0,
+	brushFallOff: 0.15, 
 	bounds_multiplier: 1,
+	max_height: 0,
 	size_multiplier: 1,
 	size_max: 1000000000,
 	points: new Array(),
@@ -91,13 +91,24 @@ input.addEventListener(
 // Display output
 // ----------------------------------------------------------------------------
 
+// sets colors to height map
 function map_color(x) {
-	let ret = x[2] * x[2] + [2] * x[2] * mapData.size_map;
-	//console.log(x);
-	return ret;
+	if (x[2] < 1)
+		return 0;
+	if (x[2] < 10)
+		return 1;
+	if (x[2] < 20)
+		return 2;
+	return 3;
 }
 
-const lookupTable = vtkLookupTable.newInstance({ hueRange: [0.666, 0.333] });
+// color table
+const lookupTable = vtkColorTransferFunction.newInstance();
+lookupTable.addRGBPoint(0, 1.0, 1.0, 0.0); // yellow
+lookupTable.addRGBPoint(1, 0.0, 1.0, 0.0); //green
+lookupTable.addRGBPoint(2, 0.5, 0.37, 0.3); //brown
+lookupTable.addRGBPoint(3, 1, 1, 1); //white
+lookupTable.build();
 
 const mapper = vtkMapper.newInstance({
 	interpolateScalarsBeforeMapping: true,
@@ -106,7 +117,8 @@ const mapper = vtkMapper.newInstance({
 	useLookupTableScalarRange: true,
 	lookupTable,
 });
-//mapper.setInputData(polyData);
+const actor = vtkActor.newInstance();
+actor.setMapper(mapper);
 
 const simpleFilter = vtkCalculator.newInstance();
 simpleFilter.setFormulaSimple(
@@ -118,6 +130,7 @@ simpleFilter.setFormulaSimple(
 ); // Our formula for z
 
 simpleFilter.setInputData(polyData);
+mapper.setInputConnection(simpleFilter.getOutputPort());
 
 const outlineFilter = vtkOutlineFilter.newInstance();
 outlineFilter.setInputData(polyData);
@@ -125,24 +138,14 @@ const outlineMapper = vtkMapper.newInstance();
 const outlineActor = vtkActor.newInstance();
 
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
-
-mapper.setInputConnection(simpleFilter.getOutputPort());
-//mapper.setInputConnection(outlineFilter.getOutputPort());
-
-const actor = vtkActor.newInstance();
-actor.getProperty().setEdgeVisibility(true);
-
-// actor.getProperty().setRepresentation(Representation.WIREFRAME);
-
-actor.setMapper(mapper);
-
 outlineActor.setMapper(outlineMapper);
+
 
 renderer.addActor(actor);
 renderer.addActor(outlineActor);
+renderer.getActiveCamera().elevation(300);
+renderer.getActiveCamera().computeDistance();
 renderer.resetCamera();
-//renderer.getActiveCamera().azimuth(15);
-//renderer.getActiveCamera().setPosition(50, 50, 1000);
 renderWindow.render();
 
 global.renderWindow = renderWindow;

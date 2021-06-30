@@ -6,34 +6,21 @@ function get_poly_index(index, mapData) {
 	);
 }
 
-function place_input_points(mapData, points) {
-	for (let i = 0; i < mapData.points.length; i++) {
-		//let polyIndex = mapData.points[i][0] * (mapData.size_map + 1) + mapData.points[i][1];
-		let polyIndex = get_poly_index(mapData.points[i], mapData);
-
-		points[polyIndex + 2] = mapData.points[i][2];
-	}
-}
-
-let brushFallOff = 0.15;
-
 function raise_terrain(mapData, index, points) {
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
-	let targetHeight = radius;
+	let targetHeight = mapData.points[index][2];
 	let deltaHeight = targetHeight - points[get_poly_index(index, mapData) + 2];
 	let sqrRadius = Math.pow(radius, 2);
 
-	let test = 0;
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
-		let test2 = 0;
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
 			if (sqrDstFromCenter <= sqrRadius) {
 				let dstFromCenter = Math.sqrt(sqrDstFromCenter);
 				let t = dstFromCenter / radius;
-				let brushWeight = Math.exp((-t * t) / brushFallOff);
+				let brushWeight = Math.exp((-t * t) / mapData.brushFallOff);
 
 				let brushX = centreX + offsetX;
 				let brushY = centreY + offsetY;
@@ -45,6 +32,13 @@ function raise_terrain(mapData, index, points) {
 				}
 			}
 		}
+	}
+}
+
+function get_max_height(mapData) {
+	for (let i = 0; i < mapData.points.length; i++) {
+		if (mapData.points[i][2] > mapData.max_height)
+			mapData.max_height = mapData.points[i][2];
 	}
 }
 
@@ -69,14 +63,14 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
-	console.log(mapData.points);
+	// elevates terrain with input points
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
 	}
-	//place_input_points(mapData, points);
-	idx = 0;
+	get_max_height(mapData);
 
-	// links triangles
+	idx = 0;
+	// links points into triangles
 	for (let k = 0; k < mapData.size_map; k++) {
 		for (let l = 0; l < mapData.size_map; l++) {
 			polys[idx * 8] = 3;
