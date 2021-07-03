@@ -64,6 +64,7 @@ function generate_map(mapData, polyData) {
 
 	
 	// elevates terrain with input points
+
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
 	}

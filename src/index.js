@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo5.mod1";
+import inputFile from "raw-loader!../resources/demo6.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
@@ -141,8 +141,6 @@ const outlineActor = vtkActor.newInstance();
 
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
 outlineActor.setMapper(outlineMapper);
-
-
 
 renderer.addActor(actor);
 renderer.addActor(outlineActor);
