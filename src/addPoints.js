@@ -23,14 +23,23 @@ function check_overlap(p1, ref) {
 	 
 }
 
+function get_tenth_vector(mapData, idx1, idx2) {
+	let vec = [0, 0, 0];
+
+	vec[0] = Math.round((mapData.points[idx1][0] - mapData.points[idx2][0]) / 10);
+	vec[1] = Math.round((mapData.points[idx1][1] - mapData.points[idx2][1]) / 10);
+	vec[2] = (mapData.points[idx1][2] - mapData.points[idx2][2]) / 10;
+
+	console.log('in tenth vec we have', vec);
+	return vec;
+}
+
 function add_points(mapData) {
 	let dist = Math.sqrt(vtkMath.distance2BetweenPoints(mapData.points[0], mapData.points[1]));
-	console.log(mapData.points);
-	console.log(mapData.size_map);
-	console.log(dist);
-	const vec = [5, 5, 0];
-	raise_ridge(mapData, mapData.points[0], vec, 12);
-	console.log(mapData.points);
+	//const vec = [5, 5, 0];
+	const vec = get_tenth_vector(mapData, 0, 1);
+	raise_ridge(mapData, mapData.points[1], vec, 10);
+	console.log("end of addPoints", mapData.points);
 }
 
 export default add_points;

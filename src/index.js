@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo6.mod1";
+import inputFile from "raw-loader!../resources/demo7.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
@@ -61,6 +61,7 @@ function main() {
 	set_size_map(mapData);
 	add_points(mapData);
 	generate_map(mapData, polyData);
+	console.log('end of main mapData', mapData);
 }
 
 main();
@@ -148,6 +149,7 @@ renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
 renderer.resetCamera();
 renderWindow.render();
+//actor.getProperty().setWireframe(true);
 
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;

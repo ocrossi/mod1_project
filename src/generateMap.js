@@ -7,7 +7,11 @@ function get_poly_index(index, mapData) {
 }
 
 function raise_terrain(mapData, index, points) {
-	let radius = mapData.points[index][2];
+	let radius = Math.round(mapData.points[index][2]);
+	// if (radius < 10) {
+	// 	console.log('ALLO');
+	// 	radius = 20;
+	// }
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let targetHeight = mapData.points[index][2];
@@ -41,6 +45,7 @@ function get_max_height(mapData) {
 			mapData.max_height = mapData.points[i][2];
 	}
 }
+
 function generate_map(mapData, polyData) {
 	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
 	let numTriangles = mapData.size_map * mapData.size_map * 2;
