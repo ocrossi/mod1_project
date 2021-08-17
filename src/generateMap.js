@@ -1,3 +1,5 @@
+import * as vtkMath from "@kitware/vtk.js/Common/Core/Math";
+
 function get_poly_index(index, mapData) {
 	return (
 		3 *
@@ -6,12 +8,37 @@ function get_poly_index(index, mapData) {
 	);
 }
 
+function get_closest_input_point(x, y, mapData, index) {
+	let dist = vtkMath.distance2BetweenPoints(
+		[0, 0, 0],
+		[mapData.size_map, mapData.size_map, 0]
+	);
+	let ref = [x, y, 0];
+	let ref_index = -1;
+
+	console.log("distance global", dist);
+	for (let i = 0; i < mapData.points.length; i++) {
+		let point = mapData.points[i];
+		point[2] = 0;
+		let curr_dist = vtkMath.distance2BetweenPoints(ref, point);
+		console.log("distance courante", curr_dist);
+		if (curr_dist < dist && i !== index) {
+			ref_index = i;
+			dist = curr_dist;
+		}
+	}
+	return ref_index;
+}
+
+function test_get_closest(mapData) {
+	console.log(
+		"test get_closest_input_point 1 : ",
+		get_closest_input_point(3, 3, mapData, 1)
+	);
+}
+
 function raise_terrain(mapData, index, points) {
-	let radius = Math.round(mapData.points[index][2]);
-	// if (radius < 10) {
-	// 	console.log('ALLO');
-	// 	radius = 20;
-	// }
+	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let targetHeight = mapData.points[index][2];
@@ -31,9 +58,38 @@ function raise_terrain(mapData, index, points) {
 
 				let z_coord = 3 * (brushX * (mapData.size_map + 1) + brushY) + 2;
 				let newHeight = deltaHeight * brushWeight;
-				if (points[z_coord] < newHeight) {
-					points[z_coord] = (points[z_coord] + newHeight) / 2;
+				let index_closest_point = get_closest_input_point(
+					brushX,
+					brushY,
+					mapData,
+					index
+				);
+				if (
+					index_closest_point !== -1 &&
+					vtkMath.distance2BetweenPoints(
+						[brushX, brushY, 0],
+						mapData.points[index_closest_point]
+					) < mapData.points[index_closest_point][1]
+				) {
+					console.log("FUUUUYOOOOOH");
 				}
+				if (points[z_coord] < newHeight && points[z_coord] !== 0)
+					console.count("test");
+				//if (points[z_coord] < newHeight && points[z_coord] !== 0) {
+				points[z_coord] = points[z_coord] + newHeight;
+				//}
+				//points[z_coord] = newHeight;
+				/*
+				let next_coord = (points[z_coord] !== 0) ? points[z_coord] + newHeight / 2: newHeight;
+				console.group();
+					console.count("no one like you");
+					console.log("x : ", brushX);
+					console.log("y : ", brushY);
+					console.log("curr z", points[z_coord]);
+					console.log("next z", next_coord);
+					console.groupEnd();
+				points[z_coord] = next_coord;
+					*/
 			}
 		}
 	}
@@ -43,6 +99,28 @@ function get_max_height(mapData) {
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] > mapData.max_height)
 			mapData.max_height = mapData.points[i][2];
+	}
+}
+
+function check_validity(mapData, points) {
+	for (let i = 0; i < mapData.points.length; i++) {
+		let pi = get_poly_index(i, mapData);
+		let z_input = mapData.points[i][2];
+		let z_map = points[pi + 2];
+		if (z_input !== z_map) {
+			console.count("mayday");
+			console.group("input");
+			console.log("x : ", mapData.points[i][0]);
+			console.log("y : ", mapData.points[i][1]);
+			console.log("z : ", mapData.points[i][2]);
+			console.groupEnd();
+
+			console.group("map");
+			console.log("x : ", points[pi]);
+			console.log("y : ", points[pi + 1]);
+			console.log("z : ", points[pi + 2]);
+			console.groupEnd();
+		}
 	}
 }
 
@@ -67,7 +145,6 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
-	
 	// elevates terrain with input points
 
 	for (let i = 0; i < mapData.points.length; i++) {
@@ -91,6 +168,7 @@ function generate_map(mapData, polyData) {
 			idx++;
 		}
 	}
+	check_validity(mapData, points);
 }
 
 export default generate_map;

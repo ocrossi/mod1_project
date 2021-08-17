@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo7.mod1";
+import inputFile from "raw-loader!../resources/demo9.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
@@ -35,14 +35,14 @@ const renderer = fullScreenRenderer.getRenderer();
 const renderWindow = fullScreenRenderer.getRenderWindow();
 
 // ----------------------------------------------------------------------------
-// The magic starts here
+// The main for map generation and water movement starts here
 // ----------------------------------------------------------------------------
 
 const polyData = vtkPolyData.newInstance();
 
 let mapData = {
 	size_map: 0,
-	brushFallOff: 0.15, 
+	brushFallOff: 0.2, 
 	bounds_multiplier: 1,
 	max_height: 0,
 	size_multiplier: 1,
@@ -59,7 +59,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
-	add_points(mapData);
+	//add_points(mapData);
 	generate_map(mapData, polyData);
 	console.log('end of main mapData', mapData);
 }
