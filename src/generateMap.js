@@ -8,20 +8,22 @@ function get_poly_index(index, mapData) {
 	);
 }
 
+// only compares x and y coordinates for 2 points, no z value included
+function distanceBetweenTwoPoints(t1, t2) {
+	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2))
+}
+
 function get_closest_input_point(x, y, mapData, index) {
-	let dist = vtkMath.distance2BetweenPoints(
+	let dist = distanceBetweenTwoPoints(
 		[0, 0, 0],
 		[mapData.size_map, mapData.size_map, 0]
 	);
 	let ref = [x, y, 0];
 	let ref_index = -1;
 
-	console.log("distance global", dist);
 	for (let i = 0; i < mapData.points.length; i++) {
-		let point = mapData.points[i];
-		point[2] = 0;
-		let curr_dist = vtkMath.distance2BetweenPoints(ref, point);
-		console.log("distance courante", curr_dist);
+		let point = [mapData.points[i][0], mapData.points[i][1], 0];
+		let curr_dist = distanceBetweenTwoPoints(ref, point);
 		if (curr_dist < dist && i !== index) {
 			ref_index = i;
 			dist = curr_dist;
@@ -30,14 +32,9 @@ function get_closest_input_point(x, y, mapData, index) {
 	return ref_index;
 }
 
-function test_get_closest(mapData) {
-	console.log(
-		"test get_closest_input_point 1 : ",
-		get_closest_input_point(3, 3, mapData, 1)
-	);
-}
 
 function raise_terrain(mapData, index, points) {
+	console.log('RAISE');
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
@@ -58,29 +55,39 @@ function raise_terrain(mapData, index, points) {
 
 				let z_coord = 3 * (brushX * (mapData.size_map + 1) + brushY) + 2;
 				let newHeight = deltaHeight * brushWeight;
+
+			/**/	
 				let index_closest_point = get_closest_input_point(
 					brushX,
 					brushY,
 					mapData,
 					index
 				);
-				if (
-					index_closest_point !== -1 &&
-					vtkMath.distance2BetweenPoints(
+				console.log('index_closest_point', index_closest_point);
+
+				let dist_to_closest = distanceBetweenTwoPoints(
 						[brushX, brushY, 0],
 						mapData.points[index_closest_point]
-					) < mapData.points[index_closest_point][1]
+					);
+				let dist_to_current = distanceBetweenTwoPoints(
+						[brushX, brushY, 0],
+						mapData.points[index]
+					);
+
+				let height_closest = mapData.points[index_closest_point][1];
+				console.group();
+				console.log('dist_to_closest', dist_to_closest);
+				console.log('height closest',	height_closest);
+				console.groupEnd();
+	
+				if (
+					index_closest_point !== -1 &&
+					newHeight < dist_to_closest
 				) {
 					console.log("FUUUUYOOOOOH");
+					newHeight = (dist_to_current / mapData.points[index][2]) * newHeight + (dist_to_closest / height_closest) * newHeight;
 				}
-				if (points[z_coord] < newHeight && points[z_coord] !== 0)
-					console.count("test");
-				//if (points[z_coord] < newHeight && points[z_coord] !== 0) {
-				points[z_coord] = points[z_coord] + newHeight;
-				//}
-				//points[z_coord] = newHeight;
 				/*
-				let next_coord = (points[z_coord] !== 0) ? points[z_coord] + newHeight / 2: newHeight;
 				console.group();
 					console.count("no one like you");
 					console.log("x : ", brushX);
@@ -89,7 +96,10 @@ function raise_terrain(mapData, index, points) {
 					console.log("next z", next_coord);
 					console.groupEnd();
 				points[z_coord] = next_coord;
-					*/
+				*/
+			//	if (points[z_coord] < newHeight)
+					points[z_coord] = points[z_coord] + newHeight;
+
 			}
 		}
 	}
@@ -147,6 +157,7 @@ function generate_map(mapData, polyData) {
 
 	// elevates terrain with input points
 
+	console.log(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
 	}
@@ -168,7 +179,9 @@ function generate_map(mapData, polyData) {
 			idx++;
 		}
 	}
-	check_validity(mapData, points);
+	let test = distanceBetweenTwoPoints(mapData.points[0], mapData.points[1]);
+	console.log()
+	//check_validity(mapData, points);
 }
 
 export default generate_map;

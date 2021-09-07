@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo9.mod1";
+import inputFile from "raw-loader!../resources/demo5.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
@@ -59,9 +59,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
-	//add_points(mapData);
 	generate_map(mapData, polyData);
-	console.log('end of main mapData', mapData);
 }
 
 main();
@@ -157,3 +155,4 @@ global.renderer = renderer;
 global.actor = actor;
 global.mapper = mapper;
 global.polyData = polyData;
+global.mapData = mapData;
