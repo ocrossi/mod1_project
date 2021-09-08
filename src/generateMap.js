@@ -10,7 +10,7 @@ function get_poly_index(index, mapData) {
 
 // only compares x and y coordinates for 2 points, no z value included
 function distanceBetweenTwoPoints(t1, t2) {
-	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2))
+	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2));
 }
 
 function get_closest_input_point(x, y, mapData, index) {
@@ -32,9 +32,36 @@ function get_closest_input_point(x, y, mapData, index) {
 	return ref_index;
 }
 
+function manage_overlapping_hills(brushX, brushY, mapData, index, newHeight) {
+	let index_closest_point = get_closest_input_point(
+		brushX,
+		brushY,
+		mapData,
+		index
+	);
+	let dist_to_closest = distanceBetweenTwoPoints(
+		[brushX, brushY, 0],
+		mapData.points[index_closest_point]
+	);
+	let dist_to_current = distanceBetweenTwoPoints(
+		[brushX, brushY, 0],
+		mapData.points[index]
+	);
+	let height_closest = mapData.points[index_closest_point][1];
+	let dist_current_closest = distanceBetweenTwoPoints(
+		mapData.points[index],
+		mapData.points[index_closest_point]
+	);
+	if (
+		dist_to_closest < height_closest &&
+		dist_current_closest > dist_to_current
+	) {
+		newHeight = newHeight * (dist_to_closest / height_closest);
+	}
+}
 
 function raise_terrain(mapData, index, points) {
-	console.log('RAISE');
+	console.log("RAISE");
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
@@ -56,37 +83,10 @@ function raise_terrain(mapData, index, points) {
 				let z_coord = 3 * (brushX * (mapData.size_map + 1) + brushY) + 2;
 				let newHeight = deltaHeight * brushWeight;
 
-			/**/	
-				let index_closest_point = get_closest_input_point(
-					brushX,
-					brushY,
-					mapData,
-					index
-				);
-				console.log('index_closest_point', index_closest_point);
-
-				let dist_to_closest = distanceBetweenTwoPoints(
-						[brushX, brushY, 0],
-						mapData.points[index_closest_point]
-					);
-				let dist_to_current = distanceBetweenTwoPoints(
-						[brushX, brushY, 0],
-						mapData.points[index]
-					);
-
-				let height_closest = mapData.points[index_closest_point][1];
-				console.group();
-				console.log('dist_to_closest', dist_to_closest);
-				console.log('height closest',	height_closest);
-				console.groupEnd();
-	
-				if (
-					index_closest_point !== -1 &&
-					newHeight < dist_to_closest
-				) {
-					console.log("FUUUUYOOOOOH");
-					newHeight = (dist_to_current / mapData.points[index][2]) * newHeight + (dist_to_closest / height_closest) * newHeight;
-				}
+				if (mapData.points.length > 1)
+					manage_overlapping_hills(brushX, brushY, mapData, index, newHeight);
+				
+				points[z_coord] += newHeight;
 				/*
 				console.group();
 					console.count("no one like you");
@@ -97,9 +97,6 @@ function raise_terrain(mapData, index, points) {
 					console.groupEnd();
 				points[z_coord] = next_coord;
 				*/
-			//	if (points[z_coord] < newHeight)
-					points[z_coord] = points[z_coord] + newHeight;
-
 			}
 		}
 	}
@@ -119,17 +116,20 @@ function check_validity(mapData, points) {
 		let z_map = points[pi + 2];
 		if (z_input !== z_map) {
 			console.count("mayday");
-			console.group("input");
+			if (mapData.points[i][2] < points[pi + 2]) console.log("Upper");
+			else console.log("Lower");
+			console.log("input z : ", mapData.points[i][2]);
+			console.log("output z : ", points[pi + 2]);
+			/*/ console.group("input");
 			console.log("x : ", mapData.points[i][0]);
 			console.log("y : ", mapData.points[i][1]);
-			console.log("z : ", mapData.points[i][2]);
 			console.groupEnd();
 
 			console.group("map");
 			console.log("x : ", points[pi]);
 			console.log("y : ", points[pi + 1]);
 			console.log("z : ", points[pi + 2]);
-			console.groupEnd();
+			console.groupEnd(); /**/
 		}
 	}
 }
@@ -156,10 +156,18 @@ function generate_map(mapData, polyData) {
 	}
 
 	// elevates terrain with input points
+	
 
-	console.log(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
-		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
+		if (i === 1) break ;
+		//if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
+		let index = get_poly_index(i, mapData);
+		if (mapData.points[i][2] > points[index + 2])
+			raise_terrain(mapData, i, points);
+		else {
+			console.log('COUILLE DANS LE POTAGE');
+			console.log(mapData.points[i]);
+		}
 	}
 	get_max_height(mapData);
 
@@ -179,9 +187,7 @@ function generate_map(mapData, polyData) {
 			idx++;
 		}
 	}
-	let test = distanceBetweenTwoPoints(mapData.points[0], mapData.points[1]);
-	console.log()
-	//check_validity(mapData, points);
+	check_validity(mapData, points);
 }
 
 export default generate_map;

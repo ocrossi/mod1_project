@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo5.mod1";
+import inputFile from "raw-loader!../resources/demo9.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
