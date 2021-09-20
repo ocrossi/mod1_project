@@ -25,6 +25,8 @@ import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
 import set_size_map from "./setMap.js";
 import add_points from "./addPoints.js";
+import generate_height_map from './generateHeightMap.js';
+
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -48,6 +50,7 @@ let mapData = {
 	size_multiplier: 1,
 	size_max: 1000000000,
 	points: new Array(),
+	height_map: new Array(),
 	input: "",
 };
 
@@ -59,6 +62,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
+	generate_height_map(mapData);
 	generate_map(mapData, polyData);
 }
 

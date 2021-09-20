@@ -9,6 +9,22 @@ function get_poly_index(index, mapData) {
 }
 
 // only compares x and y coordinates for 2 points, no z value included
+
+function sort_input_tab(mapData) {
+	let sorted = 0;
+	while (sorted != 1) {
+		sorted = 1;
+		for (let i = 0; i < mapData.points.length - 1; i++) {
+			if (mapData.points[i][2] < mapData.points[i + 1][2]) {
+				let tmp = mapData.points[i];
+				mapData.points[i] = mapData.points[i + 1];
+				mapData.points[i + 1] = tmp;
+				sorted = 0;
+			}
+		}
+	}
+}
+
 function distanceBetweenTwoPoints(t1, t2) {
 	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2));
 }
@@ -54,14 +70,23 @@ function manage_overlapping_hills(brushX, brushY, mapData, index, newHeight) {
 	);
 	if (
 		dist_to_closest < height_closest &&
-		dist_current_closest > dist_to_current
+		dist_current_closest > dist_to_current &&
+		dist_to_closest > 1
 	) {
 		newHeight = newHeight * (dist_to_closest / height_closest);
+		/*
+		console.group();
+		console.log("newHeight", newHeight);
+		console.log('dist_to_closest', dist_to_closest);
+		console.log('height_closest', height_closest);
+		console.log('dist_to_current', dist_to_current);
+		console.log('dist_current_closest', dist_current_closest);
+		console.groupEnd();
+		*/
 	}
 }
 
 function raise_terrain(mapData, index, points) {
-	console.log("RAISE");
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
@@ -85,18 +110,20 @@ function raise_terrain(mapData, index, points) {
 
 				if (mapData.points.length > 1)
 					manage_overlapping_hills(brushX, brushY, mapData, index, newHeight);
-				
-				points[z_coord] += newHeight;
-				/*
-				console.group();
+
+				if (newHeight < points[z_coord]) {
+					/*
+					console.group();
 					console.count("no one like you");
 					console.log("x : ", brushX);
 					console.log("y : ", brushY);
 					console.log("curr z", points[z_coord]);
-					console.log("next z", next_coord);
+					console.log("newHeight", newHeight);
 					console.groupEnd();
-				points[z_coord] = next_coord;
-				*/
+					*/
+				}
+				if (newHeight + points[z_coord] < newHeight) newHeight = 0;
+				points[z_coord] += newHeight;
 			}
 		}
 	}
@@ -118,9 +145,10 @@ function check_validity(mapData, points) {
 			console.count("mayday");
 			if (mapData.points[i][2] < points[pi + 2]) console.log("Upper");
 			else console.log("Lower");
+			/*
 			console.log("input z : ", mapData.points[i][2]);
 			console.log("output z : ", points[pi + 2]);
-			/*/ console.group("input");
+			// console.group("input");
 			console.log("x : ", mapData.points[i][0]);
 			console.log("y : ", mapData.points[i][1]);
 			console.groupEnd();
@@ -156,18 +184,17 @@ function generate_map(mapData, polyData) {
 	}
 
 	// elevates terrain with input points
-	
 
+	sort_input_tab(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
-		if (i === 1) break ;
-		//if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
-		let index = get_poly_index(i, mapData);
-		if (mapData.points[i][2] > points[index + 2])
-			raise_terrain(mapData, i, points);
-		else {
-			console.log('COUILLE DANS LE POTAGE');
-			console.log(mapData.points[i]);
-		}
+		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
+		//		let index = get_poly_index(i, mapData);
+		//		if (mapData.points[i][2] > points[index + 2])
+		//			raise_terrain(mapData, i, points);
+		//		else {
+		//			console.log('COUILLE DANS LE POTAGE');
+		//			console.log(mapData.points[i]);
+		//		}
 	}
 	get_max_height(mapData);
 
