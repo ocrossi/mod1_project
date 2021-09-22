@@ -168,12 +168,15 @@ function compute_heats(heat_tab) {
 	if (heat_tab.length === 1 || heat_tab[0].coef === 100)
 		return heat_tab[0].z;
 	let total_coef = 0;
+	let total_height = 0;
 	for (let i = 0; i < heat_tab.length; i++) {
 		total_coef += heat_tab[i].coef;
+		total_height += heat_tab[i].z;
 	}
-	let total_height = 0;
-	for (let j = 0; j < heat_tab.length; j++) {
-		total_height += (heat_tab[j].coef / total_coef) * heat_tab[j].coef;
+	total_height = heat_tab[0].z + total_height / heat_tab.length;
+ 	return total_height;
+	for (let j = 1; j < heat_tab.length; j++) {
+		total_height += (heat_tab[j].coef / total_coef) * heat_tab[j].z;
 	}
 	return total_height;
 }
@@ -200,10 +203,11 @@ function generate_map(mapData, polyData) {
 	}
 
 	// elevates z coords using heat map
+	let z_index = 2;
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
-				let height_box = 3 * (i * (mapData.size_map + 1) + j) + 2;
-				points[height_box] = compute_heats(mapData.heat_map[i][j]);
+				points[z_index] = compute_heats(mapData.heat_map[i][j]);
+				z_index += 3;
 			}
 		}
 	
