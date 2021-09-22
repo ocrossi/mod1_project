@@ -162,6 +162,22 @@ function check_validity(mapData, points) {
 	}
 }
 
+function compute_heats(heat_tab) {
+	if (heat_tab.length === 0)
+		return 0;
+	if (heat_tab.length === 1 || heat_tab[0].coef === 100)
+		return heat_tab[0].z;
+	let total_coef = 0;
+	for (let i = 0; i < heat_tab.length; i++) {
+		total_coef += heat_tab[i].coef;
+	}
+	let total_height = 0;
+	for (let j = 0; j < heat_tab.length; j++) {
+		total_height += (heat_tab[j].coef / total_coef) * heat_tab[j].coef;
+	}
+	return total_height;
+}
+
 function generate_map(mapData, polyData) {
 	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
 	let numTriangles = mapData.size_map * mapData.size_map * 2;
@@ -183,21 +199,21 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
-	// elevates terrain with input points
-
+	// elevates z coords using heat map
+	for (let i = 0; i <= mapData.size_map; i++) {
+		for (let j = 0; j <= mapData.size_map; j++) {
+				let height_box = 3 * (i * (mapData.size_map + 1) + j) + 2;
+				points[height_box] = compute_heats(mapData.heat_map[i][j]);
+			}
+		}
+	
+/*
 	sort_input_tab(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
-		//		let index = get_poly_index(i, mapData);
-		//		if (mapData.points[i][2] > points[index + 2])
-		//			raise_terrain(mapData, i, points);
-		//		else {
-		//			console.log('COUILLE DANS LE POTAGE');
-		//			console.log(mapData.points[i]);
-		//		}
 	}
 	get_max_height(mapData);
-
+*/
 	idx = 0;
 	// links points into triangles
 	for (let k = 0; k < mapData.size_map; k++) {

@@ -19,13 +19,13 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo9.mod1";
+import inputFile from "raw-loader!../resources/demo2.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
 import set_size_map from "./setMap.js";
 import add_points from "./addPoints.js";
-import generate_height_map from './generateHeightMap.js';
+import generate_heat_map from './generateHeatMap.js';
 
 
 // ----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ let mapData = {
 	size_multiplier: 1,
 	size_max: 1000000000,
 	points: new Array(),
-	height_map: new Array(),
+	heat_map: new Array(),
 	input: "",
 };
 
@@ -62,7 +62,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
-	generate_height_map(mapData);
+	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 }
 
