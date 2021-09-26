@@ -58,17 +58,21 @@ function manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight) {
 		z: newHeight,
 		coef: (dist_to_current / mapData.points[index][2]) * 100,
 		index: index,
+		no_height: 0,
 	};
 	//if (height_point.coef > 100) console.log("T BOURRE");
 	//if (height_point.coef === 0) console.log("T PETE");
 
-	if (mapData.heat_map[brushX][brushY].length === 0) {
-		//	console.log("X,Y:", brushX, brushY);
-		//	console.log(mapData.heat_map[brushX][brushY]);
+	//if (mapData.heat_map[brushX][brushY].length === 0) {
+	//	console.log("X,Y:", brushX, brushY);
+	//	console.log(mapData.heat_map[brushX][brushY]);
+	if (mapData.heat_map[brushX][brushY][0].no_height === 1)
+		mapData.heat_map[brushX][brushY][0] = height_point;
+	else
 		mapData.heat_map[brushX][brushY].push(height_point);
-	} else {
-		store_heat(height_point, mapData.heat_map[brushX][brushY]);
-	}
+	//} else {
+	//	store_heat(height_point, mapData.heat_map[brushX][brushY]);
+	//}
 }
 
 function get_heat(mapData, index) {
@@ -85,7 +89,7 @@ function get_heat(mapData, index) {
 	} else {
 		let test =
 			mapData.heat_map[mapData.points[index][0]][mapData.points[index][1]][0].z;
-		//console.log('dans get heat return classique test = ', test);
+		console.log("dans get heat return classique test = ", test);
 		return mapData.heat_map[mapData.points[index][0]][
 			mapData.points[index][1]
 		][0].z;
@@ -122,18 +126,16 @@ function mark_terrain(mapData, index) {
 	}
 }
 
-function test_coefs(mapData) {
-	for (let i = 0; i <= mapData.size_map; i++) {
-		for (let j = 0; j <= mapData.size_map; j++) {
-			for (let k = 0; k < mapData.heat_map[i][j].length - 1; k++) {
-				if (
-					mapData.heat_map[i][j][k].coef < mapData.heat_map[i][j][k + 1].coef
-				) {
-					console.log("wtf");
-				}
-			}
-		}
-	}
+function compute_heats(heat_tab) {
+	if ((heat_tab.length === 1 && heat_tab[0]) || heat_tab[0].coef === 100)
+		return;
+	let max_height = heat_tab[0].z;
+	for (let i = 0; i < heat_tab.length; i++)
+		max_height = heat_tab[i].z < max_height ? max_height : heat_tab[i].z;
+	if (max_height !== heat_tab[0].z)
+		max_height -=
+			(max_height - heat_tab[0].z) * ((100 - heat_tab[0].coef) / 100);
+	heat_tab[0].z = max_height;
 }
 
 function generate_heat_map(mapData) {
@@ -143,20 +145,21 @@ function generate_heat_map(mapData) {
 		mapData.heat_map[i] = new Array(mapData.size_map + 1);
 		for (let j = 0; j <= mapData.size_map; j++) {
 			mapData.heat_map[i][j] = new Array();
+			mapData.heat_map[i][j][0] = { z: 0, no_height: 1 };
 		}
 	}
 	for (let i = 0; i < mapData.points.length; i++) {
-		let height_point = {
+		mapData.heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
 			z: mapData.points[i][2],
 			coef: 100,
 			index: i,
+			no_height: 0,
 		};
-		mapData.heat_map[mapData.points[i][0]][
-			mapData.points[i][1]
-		][0] = height_point;
 		mark_terrain(mapData, i);
 	}
-	test_coefs(mapData);
+	for (let i = 0; i < mapData.size_map; i++)
+		for (let j = 0; j < mapData.size_map; j++)
+			compute_heats(mapData.heat_map[i][j]);
 }
 
 export default generate_heat_map;

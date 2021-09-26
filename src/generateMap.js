@@ -15,7 +15,7 @@ function sort_input_tab(mapData) {
 	while (sorted != 1) {
 		sorted = 1;
 		for (let i = 0; i < mapData.points.length - 1; i++) {
-			if (mapData.points[i][2] < mapData.points[i + 1][2]) {
+			if (mapData.points[i][2] > mapData.points[i + 1][2]) {
 				let tmp = mapData.points[i];
 				mapData.points[i] = mapData.points[i + 1];
 				mapData.points[i + 1] = tmp;
@@ -162,24 +162,7 @@ function check_validity(mapData, points) {
 	}
 }
 
-function compute_heats(heat_tab) {
-	if (heat_tab.length === 0)
-		return 0;
-	if (heat_tab.length === 1 || heat_tab[0].coef === 100)
-		return heat_tab[0].z;
-	let total_coef = 0;
-	let total_height = 0;
-	for (let i = 0; i < heat_tab.length; i++) {
-		total_coef += heat_tab[i].coef;
-		total_height += heat_tab[i].z;
-	}
-	total_height = heat_tab[0].z + total_height / heat_tab.length;
- 	return total_height;
-	for (let j = 1; j < heat_tab.length; j++) {
-		total_height += (heat_tab[j].coef / total_coef) * heat_tab[j].z;
-	}
-	return total_height;
-}
+
 
 function generate_map(mapData, polyData) {
 	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
@@ -206,12 +189,13 @@ function generate_map(mapData, polyData) {
 	let z_index = 2;
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
-				points[z_index] = compute_heats(mapData.heat_map[i][j]);
-				z_index += 3;
-			}
+			console.log(mapData.heat_map[i][j]);
+			points[z_index] = mapData.heat_map[i][j][0].z;
+			z_index += 3;
 		}
-	
-/*
+	}
+
+	/*
 	sort_input_tab(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
@@ -237,4 +221,4 @@ function generate_map(mapData, polyData) {
 	check_validity(mapData, points);
 }
 
-export default generate_map;
+export { generate_map, sort_input_tab }; // un peu sale, sortir input tab de la au moment de la refacto

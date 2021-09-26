@@ -19,10 +19,10 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo9.mod1";
+import inputFile from "raw-loader!../resources/demo5.mod1";
 
 import parse_input from "./parsing.js";
-import generate_map from "./generateMap.js";
+import {generate_map, sort_input_tab} from "./generateMap.js";
 import set_size_map from "./setMap.js";
 import add_points from "./addPoints.js";
 import generate_heat_map from './generateHeatMap.js';
@@ -62,6 +62,7 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
+	sort_input_tab(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 }
