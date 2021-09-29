@@ -15,7 +15,7 @@ function sort_input_tab(mapData) {
 	while (sorted != 1) {
 		sorted = 1;
 		for (let i = 0; i < mapData.points.length - 1; i++) {
-			if (mapData.points[i][2] > mapData.points[i + 1][2]) {
+			if (mapData.points[i][2] < mapData.points[i + 1][2]) {
 				let tmp = mapData.points[i];
 				mapData.points[i] = mapData.points[i + 1];
 				mapData.points[i + 1] = tmp;
@@ -189,7 +189,7 @@ function generate_map(mapData, polyData) {
 	let z_index = 2;
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
-			console.log(mapData.heat_map[i][j]);
+			//console.log(mapData.heat_map[i][j]);
 			points[z_index] = mapData.heat_map[i][j][0].z;
 			z_index += 3;
 		}
