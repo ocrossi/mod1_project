@@ -17,7 +17,7 @@ function get_closest_input_point2(x, y, mapData, index) {
 	let ref_index = -1;
 
 	for (let i = 0; i < mapData.points.length; i++) {
-		let point = [mapData.points[i][0], mapData.points[i][1], 0];
+		let point = [mapData.points[i][0], mapData.points[i][1], mapData.points[i][2]];
 		let curr_dist = distanceBetween2Points(ref, point);
 		if (curr_dist < dist && i !== index) {
 			ref_index = i;
@@ -45,16 +45,6 @@ function manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight) {
 		mapData,
 		index
 	);
-	/*
-	let dist_to_closest = distanceBetween2Points(
-		[brushX, brushY, 0],
-		mapData.points[index_closest_point]
-	);
-	let dist_to_current = distanceBetween2Points(
-		[brushX, brushY, 0],
-		mapData.points[index]
-	);
-	*/
 	let dist_to_closest = distanceBetween2Points(
 		[brushX, brushY, newHeight],
 		mapData.points[index_closest_point]
@@ -79,29 +69,13 @@ function manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight) {
 		z: newHeight,
 		coef: coef,
 		index: index,
+		index_closest: index_closest_point,
 		height_closest: height_closest,
 		no_height: 0,
 	};
 	if (mapData.heat_map[brushX][brushY][0].no_height === 1)
 		mapData.heat_map[brushX][brushY][0] = height_point;
 	else mapData.heat_map[brushX][brushY].push(height_point);
-}
-
-function get_heat(mapData, index) {
-	if (
-		mapData.heat_map[mapData.points[index][0]][mapData.points[index][1]]
-			.length === 0
-	) {
-		console.log("ola");
-		return 0;
-	} else {
-		let test =
-			mapData.heat_map[mapData.points[index][0]][mapData.points[index][1]][0].z;
-		console.log("dans get heat return classique test = ", test);
-		return mapData.heat_map[mapData.points[index][0]][
-			mapData.points[index][1]
-		][0].z;
-	}
 }
 
 function get_shortest_boundary(mapData, index) {
@@ -113,46 +87,27 @@ function get_shortest_boundary(mapData, index) {
 	];
 	let res = mapData.size_map;
 	for (let i = 0; i < 4; i++) {
-		res = (bounds[i] < res) ? bounds[i]: res;
+		res = bounds[i] < res ? bounds[i] : res;
 	}
 	return res;
 }
 
 function get_radius(mapData, index) {
-	let index_closest_point = get_closest_input_point2(
-		mapData.points[index][0],
-		mapData.points[index][1],
-		mapData,
-		index
-	);
-	let radius = distanceBetween2Points(
-		[
-			mapData.points[index][0],
-			mapData.points[index][1],
-			mapData.points[index][2],
-		],
-		[
-			mapData.points[index_closest_point][0],
-			mapData.points[index_closest_point][1],
-			mapData.points[index_closest_point][2],
-		]
-	);
+	let radius = distanceBetween2Points(mapData.points[index], get_closest_input_point2());
 	let shortest_boudary = get_shortest_boundary(mapData, index);
 	radius = radius < shortest_boudary ? radius : shortest_boudary;
+	console.log('get radius returns', radius);
 	return radius;
-	//	if (radius < mapData.points[index_closest_point][2])
-	//	return distanceBetween2Points(mapData.points[index], mapData.points[index_closest_point]) / 2;
 }
 
 function mark_terrain(mapData, index) {
-	//let radius = mapData.points[index][2];
-	let radius = get_radius(mapData, index);
+	let radius = mapData.points[index][2];
+	//let radius = get_radius(mapData, index);
 
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let targetHeight = mapData.points[index][2];
-	//let deltaHeight = targetHeight - get_heat(mapData, index);
-	let deltaHeight = targetHeight;
+	//let deltaHeight = targetHeight;
 	let sqrRadius = Math.pow(radius, 2);
 
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
@@ -165,6 +120,7 @@ function mark_terrain(mapData, index) {
 
 				let brushX = centreX + offsetX;
 				let brushY = centreY + offsetY;
+				let deltaHeight = targetHeight - get_highest_coef_height(brushX, brushY);
 				if (brushX === centreX && brushY === centreY) continue;
 				let newHeight = deltaHeight * brushWeight;
 				manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight);
@@ -173,30 +129,28 @@ function mark_terrain(mapData, index) {
 	}
 }
 
-function compute_heats(heat_tab) {
-	if ((heat_tab.length === 1 && heat_tab[0]) || heat_tab[0].coef === 100)
-		return;
-	let max_height = heat_tab[0].z;
-	let sum_tot = 0;
-	for (let i = 0; i < heat_tab.length; i++) {
-		max_height = heat_tab[i].z < max_height ? max_height : heat_tab[i].z;
-		if (i > 1) sum_tot += heat_tab[i].z;
-	}
-	// try sum_tot
-	sum_tot =
-		sum_tot > heat_tab[0].height_closest ? heat_tab[0].height_closest : sum_tot;
-	sum_tot *= (100 - heat_tab[0].coef) / 100;
-	let res = max_height + sum_tot;
-	/*
-	if (max_height !== heat_tab[0].z)
-		max_height -=
-			(max_height - heat_tab[0].z) * ((100 - heat_tab[0].coef) / 100);
-	*/
-	heat_tab[0].z = max_height;
-	if (max_height === 0) console.log("wtf");
-	heat_tab[0].z = res;
+function diff_input_heights(h1, h2) {
+	return Math.abs(h1 - h2);
 }
+
+function compute_heats2(heat_tab) {
+	if (heat_tab[0].no_height === 1) return;
+	let idx_highest_coef = 0;
+	let idx_highest_point = 0;
+	let hp = 0;
+	for (let i = 0; i < heat_tab.length; i++) {
+		idx_highest_coef =
+			heat_tab[i].coef > idx_highest_coef ? i : idx_highest_coef;
+		if (heat_tab[i].z > idx_highest_point) {
+			idx_highest_point = i;
+			hp = heat_tab[i].z
+		}
+	}
+	heat_tab[0].z = heat_tab[idx_highest_coef].z + heat_tab[idx_highest_point].z * ((100 - heat_tab[idx_highest_coef].coef) / 100);
+}
+
 let test = 0;
+
 function test_results(heat_tab, prev_heat) {
 	if (heat_tab[0].z < prev_heat[0].z / 10 && prev_heat[0].z > 5) {
 		console.group();
@@ -230,7 +184,7 @@ function generate_heat_map(mapData) {
 	}
 	for (let i = 1; i < mapData.size_map; i++)
 		for (let j = 1; j < mapData.size_map; j++) {
-			compute_heats(mapData.heat_map[i][j]);
+			compute_heats2(mapData.heat_map[i][j]);
 			//test_results(mapData.heat_map[i][j], mapData.heat_map[i][j - 1]);
 		}
 }

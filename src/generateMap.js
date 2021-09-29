@@ -15,7 +15,7 @@ function sort_input_tab(mapData) {
 	while (sorted != 1) {
 		sorted = 1;
 		for (let i = 0; i < mapData.points.length - 1; i++) {
-			if (mapData.points[i][2] < mapData.points[i + 1][2]) {
+			if (mapData.points[i][2] > mapData.points[i + 1][2]) {
 				let tmp = mapData.points[i];
 				mapData.points[i] = mapData.points[i + 1];
 				mapData.points[i + 1] = tmp;
@@ -145,7 +145,7 @@ function check_validity(mapData, points) {
 			console.count("mayday");
 			if (mapData.points[i][2] < points[pi + 2]) console.log("Upper");
 			else console.log("Lower");
-			/*
+			
 			console.log("input z : ", mapData.points[i][2]);
 			console.log("output z : ", points[pi + 2]);
 			// console.group("input");
