@@ -86,12 +86,15 @@ function manage_overlapping_hills(brushX, brushY, mapData, index, newHeight) {
 	}
 }
 
+
+
 function raise_terrain(mapData, index, points) {
 	let radius = mapData.points[index][2];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let targetHeight = mapData.points[index][2];
-	let deltaHeight = targetHeight - points[get_poly_index(index, mapData) + 2];
+	let deltaHeight = targetHeight;
+	//let deltaHeight = targetHeight - points[get_poly_index(index, mapData) + 2];
 	let sqrRadius = Math.pow(radius, 2);
 
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {

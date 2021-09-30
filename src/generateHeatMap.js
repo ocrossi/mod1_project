@@ -1,10 +1,12 @@
 import * as vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import compute_radius from './computeRadius.js';
+
 
 function distanceBetween2Points(t1, t2) {
 	return Math.sqrt(
 		Math.pow(t2[0] - t1[0], 2) +
-			Math.pow(t2[1] - t1[1], 2) +
-			Math.pow(t1[2] - t2[2], 2)
+		Math.pow(t2[1] - t1[1], 2) +
+		Math.pow(t2[2] - t1[2], 2)	
 	);
 }
 
@@ -59,12 +61,6 @@ function manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight) {
 		mapData.points[index_closest_point]
 	);
 	let coef = (1 - dist_to_current / mapData.points[index][2]) * 100;
-	if (coef === 100) {
-		console.log("IL CHEAT ZBI");
-		console.log("allo", dist_to_current);
-		console.log("alloa", mapData.points[index][2]);
-		console.log("alloa", newHeight);
-	}
 	let height_point = {
 		z: newHeight,
 		coef: coef,
@@ -75,65 +71,44 @@ function manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight) {
 	};
 	if (mapData.heat_map[brushX][brushY][0].no_height === 1)
 		mapData.heat_map[brushX][brushY][0] = height_point;
-	else mapData.heat_map[brushX][brushY].push(height_point);
+	else mapData.heat_map[brushX][brushY].splice(0, 0, height_point);
 }
 
-function get_shortest_boundary(mapData, index) {
-	let bounds = [
-		mapData.points[index][0],
-		mapData.points[index][1],
-		mapData.size_map - mapData.points[index][0],
-		mapData.size_map - mapData.points[index][1],
-	];
-	let res = mapData.size_map;
-	for (let i = 0; i < 4; i++) {
-		res = bounds[i] < res ? bounds[i] : res;
-	}
-	return res;
-}
-
-function get_radius(mapData, index) {
-	let radius = distanceBetween2Points(mapData.points[index], get_closest_input_point2());
-	let shortest_boudary = get_shortest_boundary(mapData, index);
-	radius = radius < shortest_boudary ? radius : shortest_boudary;
-	console.log('get radius returns', radius);
-	return radius;
-}
+function get_heat(idx, mapData) {
+	return mapData.heat_map[mapData.points[idx][0]][mapData.points[idx][1]][0].z;
+} 
 
 function mark_terrain(mapData, index) {
-	let radius = mapData.points[index][2];
-	//let radius = get_radius(mapData, index);
-
+	let radius = mapData.points[index][2] / 5;
+	//let radius = compute_radius(mapData, index);
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let targetHeight = mapData.points[index][2];
-	//let deltaHeight = targetHeight;
+	//let deltaHeight = targetHeight - get_heat(index, mapData);
+	let deltaHeight = targetHeight;
 	let sqrRadius = Math.pow(radius, 2);
 
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
-			if (sqrDstFromCenter <= sqrRadius) {
+			if (sqrDstFromCenter <= 3 * sqrRadius) {
+				
 				let dstFromCenter = Math.sqrt(sqrDstFromCenter);
 				let t = dstFromCenter / radius;
 				let brushWeight = Math.exp((-t * t) / mapData.brushFallOff);
 
 				let brushX = centreX + offsetX;
 				let brushY = centreY + offsetY;
-				let deltaHeight = targetHeight - get_highest_coef_height(brushX, brushY);
-				if (brushX === centreX && brushY === centreY) continue;
-				let newHeight = deltaHeight * brushWeight;
+				//let newHeight = deltaHeight * brushWeight;
+				
+				let newHeight = Math.pow(radius, 2) - (Math.pow((brushX - centreX), 2) + Math.pow((brushY - centreY), 2));
 				manage_overlapping_terrain(brushX, brushY, mapData, index, newHeight);
 			}
 		}
 	}
 }
 
-function diff_input_heights(h1, h2) {
-	return Math.abs(h1 - h2);
-}
-
-function compute_heats2(heat_tab) {
+function compute_heats(heat_tab) {
 	if (heat_tab[0].no_height === 1) return;
 	let idx_highest_coef = 0;
 	let idx_highest_point = 0;
@@ -141,37 +116,39 @@ function compute_heats2(heat_tab) {
 	for (let i = 0; i < heat_tab.length; i++) {
 		idx_highest_coef =
 			heat_tab[i].coef > idx_highest_coef ? i : idx_highest_coef;
-		if (heat_tab[i].z > idx_highest_point) {
+		if (heat_tab[i].z > hp) {
 			idx_highest_point = i;
 			hp = heat_tab[i].z
 		}
 	}
-	heat_tab[0].z = heat_tab[idx_highest_coef].z + heat_tab[idx_highest_point].z * ((100 - heat_tab[idx_highest_coef].coef) / 100);
-}
-
-let test = 0;
-
-function test_results(heat_tab, prev_heat) {
-	if (heat_tab[0].z < prev_heat[0].z / 10 && prev_heat[0].z > 5) {
-		console.group();
-		console.log("hey wthell", ++test);
-		console.log("gotcha");
-		console.log(heat_tab);
-		console.log(prev_heat);
-		console.groupEnd();
+	let cfactor = (100 - heat_tab[idx_highest_coef].coef) / 100;
+	let ret = 0;
+	if (idx_highest_point === idx_highest_coef) {
+		heat_tab[0].z = hp;
+		return;
+	}
+	else {
+		for (let i = 0; i < heat_tab.length; i++) {
+			if (i === idx_highest_coef)
+				continue;
+			ret += heat_tab[i].z * cfactor;
+		}
+		heat_tab[0].z = ret + heat_tab[idx_highest_coef].z;
 	}
 }
 
 function generate_heat_map(mapData) {
 	mapData.heat_map = new Array(mapData.size_map + 1);
 
+	// allocate a tab for each pair of x,y coords on the map
 	for (let i = 0; i <= mapData.size_map; i++) {
 		mapData.heat_map[i] = new Array(mapData.size_map + 1);
 		for (let j = 0; j <= mapData.size_map; j++) {
 			mapData.heat_map[i][j] = new Array();
-			mapData.heat_map[i][j][0] = { z: 0, no_height: 1 };
+			mapData.heat_map[i][j][0] = { z: 0, no_height: 1, coef: 0 };
 		}
 	}
+	// fixes input points on map and marks terrain with hills with an exponential slope
 	for (let i = 0; i < mapData.points.length; i++) {
 		mapData.heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
 			z: mapData.points[i][2],
@@ -182,10 +159,10 @@ function generate_heat_map(mapData) {
 		};
 		mark_terrain(mapData, i);
 	}
+	// calculate height of each point depending on the collisions of different hills
 	for (let i = 1; i < mapData.size_map; i++)
 		for (let j = 1; j < mapData.size_map; j++) {
-			compute_heats2(mapData.heat_map[i][j]);
-			//test_results(mapData.heat_map[i][j], mapData.heat_map[i][j - 1]);
+			//compute_heats(mapData.heat_map[i][j]);
 		}
 }
 

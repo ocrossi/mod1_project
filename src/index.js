@@ -24,6 +24,7 @@ import inputFile from "raw-loader!../resources/demo5.mod1";
 import parse_input from "./parsing.js";
 import {generate_map, sort_input_tab} from "./generateMap.js";
 import set_size_map from "./setMap.js";
+import sort_closest_points from './sortClosestPoint';
 import add_points from "./addPoints.js";
 import generate_heat_map from './generateHeatMap.js';
 
@@ -50,6 +51,7 @@ let mapData = {
 	size_multiplier: 1,
 	size_max: 1000000000,
 	points: new Array(),
+	closest_points: new Array(),
 	heat_map: new Array(),
 	input: "",
 };
@@ -63,6 +65,7 @@ function main() {
 	}
 	set_size_map(mapData);
 	sort_input_tab(mapData);
+	sort_closest_points(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 }
