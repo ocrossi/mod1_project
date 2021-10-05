@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo2.mod1";
+import inputFile from "raw-loader!../resources/demo3.mod1";
 
 import parse_input from "./parsing.js";
 import generate_map from "./generateMap.js";
@@ -54,6 +54,7 @@ let mapData = {
 	closest_points: new Array(),
 	heat_map: new Array(),
 	input: "",
+	breaktime: 4, // to remove
 };
 
 function main() {

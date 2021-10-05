@@ -17,25 +17,36 @@ function store_heat(x, y, index, newHeight, mapData) {
 	}
 }
 
+function compute_factor(index, mapData) {
+	let rad = mapData.points[index][3];
+	let sqr_rad = Math.pow(rad, 2);
+	let fac =  rad / sqr_rad;
+	if (rad === 0)
+		return 0;
+	if (sqr_rad * fac === mapData.points[index][2]) {
+		console.log('opa');
+	}
+	else {
+		fac = mapData.points[index][2] / sqr_rad;
+		console.log('not opa fac =', fac);
+	}
+	return fac;
+}
+
 function mark_terrain(index, mapData) {
 	let radius = mapData.points[index][3];
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let sqrRadius = Math.pow(radius, 2);
-	let factor_complement =
-		radius / Math.pow(radius, 2) > mapData.points[index][2]
-			? 1 / (Math.pow(radius, 2) * mapData.points[index][2])
-			: 1;
-
+/*
 	console.group();
-	console.log('FACTOR COMPLEMENT', factor_complement);
 	console.count('mark terrain');
 	console.log('input point', mapData.points[index]);
 	console.log('radius', radius);
 	console.log('celui qu on aurait pris de base', mapData.points[index][2]);
 	console.groupEnd();
-	/*
-*/
+	*/
+	let factor = compute_factor(index, mapData);
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
@@ -46,9 +57,8 @@ function mark_terrain(index, mapData) {
 				let newHeight =
 					Math.pow(radius, 2) -
 					(Math.pow(brushX - centreX, 2) + Math.pow(brushY - centreY, 2));
-				let factor = radius / Math.pow(radius, 2);
 				newHeight *= factor;
-				newHeight = Math.round(newHeight * factor_complement);
+				//newHeight = Math.round(newHeight); // love this line
 				store_heat(brushX, brushY, index, newHeight, mapData);
 			}
 		}
@@ -68,7 +78,7 @@ function generate_heat_map(mapData) {
 	}
 	sort_closest_points(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
-		
+		//if (i === mapData.breaktime) break ;	
 		// sets input points
 		mapData.heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
 			z: mapData.points[i][2],

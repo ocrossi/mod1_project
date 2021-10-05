@@ -126,6 +126,7 @@ function get_max_height(mapData) {
 
 function check_validity(mapData, points) {
 	for (let i = 0; i < mapData.points.length; i++) {
+		//if (i === mapData.breaktime) break;
 		let pi = get_poly_index(i, mapData);
 		let z_input = mapData.points[i][2];
 		let z_map = points[pi + 2];

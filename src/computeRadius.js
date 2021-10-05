@@ -11,12 +11,24 @@ function check_bounds(radius, index, mapData) {
 	for (let i = 0; i < 4; i++) {
 		min = (bounds[i] < min) ? bounds[i] : min;
 	}
+/*
+	for (let i = 0; i < mapData.closest_points[index].length; i++) {
+		let dist = mapData.closest_points[index][i].dist;
+		min = (dist < min) ? Math.round(dist) : min;
+	}
+	*/
 	radius = (radius > min) ? min : radius;
 	//console.log('conprends po', radius);
 	return radius;
 }
 
-// r for reference c for comparaison, icp for index closest_points
+function increase_radius(radius, i_r, i_c, mapData) {
+	let c_height = 0;
+}
+
+function decrease_radius(radius, i_r, i_c, mapData) {}
+
+// i_r for index reference, i_c c for comparaison, icp for index closest_points
 function modify_radius(i_r, i_c, i_cp, mapData, height) {
 	//console.log('beginning of modify_radius');
 	let r_x = mapData.points[i_r][0];
@@ -28,31 +40,30 @@ function modify_radius(i_r, i_c, i_cp, mapData, height) {
 	//console.log('height : ', height);
 	if (height > mapData.points[i_c][2]) {
 		console.log('radius too big');
-		while (cradius > 0) {
+		while (cradius > 1) {
 			cradius--;
 			let c_height =
 				(Math.pow(cradius, 2) -
 				(Math.pow(r_x - c_x, 2) + Math.pow(r_y - c_y, 2))) * (cradius / Math.pow(cradius, 2));
 			if (c_height < mapData.points[i_c][2]) {
-				cradius++;
-				mapData.closest_points[i_c][i_cp].radius = cradius;
-				if (cradius < Math.sqrt(mapData.points[i_r][2])) {
-					let test = Math.sqrt(mapData.points[i_r][2]);
-					//console.log("AYAAAA", cradius, test);
-				}
+				cradius--;
+				mapData.closest_points[i_r][i_cp].radius = cradius;
 				return;
 			}
 		}
-	} else if (height < mapData.points[i_c][2]) {
-		
+	} else if (height < mapData.points[i_c][2]) {	
+		console.log('radius too small');
+		console.log('height :', height);
+		console.log('input height :', mapData.points[i_c][2])
 		while (1) {
 			cradius++;
 			let c_height =
 				(Math.pow(cradius, 2) -
 				(Math.pow(r_x - c_x, 2) + Math.pow(r_y - c_y, 2))) * (cradius / Math.pow(cradius, 2));
 			if (c_height  > mapData.points[i_c][2]) {
+				cradius--;
 				cradius = check_bounds(cradius, i_r, mapData);
-				//console.log('CRADIUS CON DE TA M', cradius);
+				console.log('CRADIUS CON DE TA M', cradius);
 				mapData.closest_points[i_r][i_cp].radius = cradius;
 				return;
 			}
@@ -80,6 +91,10 @@ function compute_radius(index, mapData) {
 	let r_y = mapData.points[index][1];
 	let nradius = 0;
 
+	if (base_radius === 0) {
+		mapData.points[index].push(0);
+		return;
+	}
 	for (let i = 0; i < mapData.closest_points[index].length; i++) {
 		let idx_closest = mapData.closest_points[index][i].idx;
 		let c_x = mapData.points[idx_closest][0];
@@ -89,8 +104,10 @@ function compute_radius(index, mapData) {
 			(Math.pow(r_x - c_x, 2) + Math.pow(r_y - c_y, 2))) * factor;
 		modify_radius(index, idx_closest, i, mapData, c_height);
 	}
+
 	nradius = get_smallest_radius(index, mapData);
-	//console.log('new radius', nradius);
+	console.log('old radius', base_radius);
+	console.log('new radius', nradius);
 	mapData.points[index].push(nradius);
 }
 
