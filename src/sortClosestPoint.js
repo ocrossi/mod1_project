@@ -19,13 +19,18 @@ function sort_distance_tab(mapData, idx) {
 
 
 function map_points_with_distance(mapData, idx) {
+	mapData.closest_points[idx] = new Array();
 	for (let i = 0; i < mapData.points.length; i++) {
 		if (i === idx) continue;
 		let dist_to_current = {
 			idx: i,
-			dist: distanceBetweenTwoPointsFlat(mapData.points[idx], mapData.points[i])
+			dist: distanceBetweenTwoPointsFlat(mapData.points[idx], mapData.points[i]),
+			radius: -1,
 		};
 		mapData.closest_points[idx].push(dist_to_current);
+		//console.log('mais what');
+		//console.log(mapData.closest_points);
+
 	}
 }
 
@@ -33,7 +38,6 @@ function sort_closest_points(mapData) {
 	if (mapData.points.length < 2)
 		return;
 	for (let i = 0; i < mapData.points.length; i++) {
-		mapData.closest_points[i] = new Array();
 		map_points_with_distance(mapData, i);
 		sort_distance_tab(mapData, i);
 	}

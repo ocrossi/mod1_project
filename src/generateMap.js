@@ -10,21 +10,6 @@ function get_poly_index(index, mapData) {
 
 // only compares x and y coordinates for 2 points, no z value included
 
-function sort_input_tab(mapData) {
-	let sorted = 0;
-	while (sorted != 1) {
-		sorted = 1;
-		for (let i = 0; i < mapData.points.length - 1; i++) {
-			if (mapData.points[i][2] > mapData.points[i + 1][2]) {
-				let tmp = mapData.points[i];
-				mapData.points[i] = mapData.points[i + 1];
-				mapData.points[i + 1] = tmp;
-				sorted = 0;
-			}
-		}
-	}
-}
-
 function distanceBetweenTwoPoints(t1, t2) {
 	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2));
 }
@@ -192,19 +177,10 @@ function generate_map(mapData, polyData) {
 	let z_index = 2;
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
-			//console.log(mapData.heat_map[i][j]);
 			points[z_index] = mapData.heat_map[i][j][0].z;
 			z_index += 3;
 		}
 	}
-
-	/*
-	sort_input_tab(mapData);
-	for (let i = 0; i < mapData.points.length; i++) {
-		if (mapData.points[i][2] !== 0) raise_terrain(mapData, i, points);
-	}
-	get_max_height(mapData);
-*/
 	idx = 0;
 	// links points into triangles
 	for (let k = 0; k < mapData.size_map; k++) {
@@ -224,4 +200,4 @@ function generate_map(mapData, polyData) {
 	check_validity(mapData, points);
 }
 
-export { generate_map, sort_input_tab }; // un peu sale, sortir input tab de la au moment de la refacto
+export default generate_map;

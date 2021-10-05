@@ -56,6 +56,21 @@ function mapCoords_to_worldCoords(mapData, bounds) {
 }
 
 
+function sort_input_tab(mapData) {
+	let sorted = 0;
+	while (sorted != 1) {
+		sorted = 1;
+		for (let i = 0; i < mapData.points.length - 1; i++) {
+			if (mapData.points[i][2] > mapData.points[i + 1][2]) {
+				let tmp = mapData.points[i];
+				mapData.points[i] = mapData.points[i + 1];
+				mapData.points[i + 1] = tmp;
+				sorted = 0;
+			}
+		}
+	}
+}
+
 
 function set_size_map(mapData) {
 	let bounds = {};
@@ -66,6 +81,7 @@ function set_size_map(mapData) {
 	mapData.size_map = Math.max(bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin);
 	resize_map(mapData, bounds);
 	mapCoords_to_worldCoords(mapData, bounds);
+	sort_input_tab(mapData);
 }
 
 export default set_size_map;
