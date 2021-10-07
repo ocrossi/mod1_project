@@ -19,15 +19,15 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo3.mod1";
+import inputFile from "raw-loader!../resources/demo5.mod1";
 
 import parse_input from "./parsing.js";
-import generate_map from "./generateMap.js";
 import set_size_map from "./setMap.js";
-import sort_closest_points from './sortClosestPoint';
-import add_points from "./addPoints.js";
+import compute_hills_size from './computeHillsSize.js'
 import generate_heat_map from './generateHeatMap.js';
-
+import generate_map from "./generateMap.js";
+import sort_closest_points from './sortClosestPoint';
+//import add_points from "./addPoints.js";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -65,6 +65,8 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
+	mapData.points = [mapData.points[7], mapData.points[13]]
+	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 }

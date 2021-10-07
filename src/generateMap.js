@@ -40,7 +40,7 @@ function manage_overlapping_hills(brushX, brushY, mapData, index, newHeight) {
 		mapData,
 		index
 	);
-	let dist_to_closest = distanceBetweenTwoPoints(
+	let dist_to_closest = distanceBetweenTwoPoints(length
 		[brushX, brushY, 0],
 		mapData.points[index_closest_point]
 	);
@@ -176,6 +176,12 @@ function generate_map(mapData, polyData) {
 
 	// elevates z coords using heat map
 	let z_index = 2;
+/*
+	let test = 13;
+	let t1 = mapData.points[test][0];
+	let t2 = mapData.points[test][1];
+	mapData.heat_map[t1][t2][0].z += 100;
+*/
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
 			points[z_index] = mapData.heat_map[i][j][0].z;

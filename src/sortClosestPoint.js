@@ -26,11 +26,9 @@ function map_points_with_distance(mapData, idx) {
 			idx: i,
 			dist: distanceBetweenTwoPointsFlat(mapData.points[idx], mapData.points[i]),
 			radius: -1,
+			factor: -1,
 		};
 		mapData.closest_points[idx].push(dist_to_current);
-		//console.log('mais what');
-		//console.log(mapData.closest_points);
-
 	}
 }
 
