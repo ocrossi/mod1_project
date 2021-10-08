@@ -1,5 +1,4 @@
 import * as vtkMath from "@kitware/vtk.js/Common/Core/Math";
-import compute_radius from "./computeRadius.js";
 import sort_closest_points from "./sortClosestPoint.js";
 
 function store_heat(x, y, index, newHeight, mapData) {
@@ -17,19 +16,13 @@ function store_heat(x, y, index, newHeight, mapData) {
 	}
 }
 
-function compute_factor(index, mapData) {
-	let rad = mapData.points[index][3];
-	let sqr_rad = Math.pow(rad, 2);
-	let fac =  rad / sqr_rad;
-	if (rad === 0)
-		return 0;
-	if (sqr_rad * fac === mapData.points[index][2]) {
-		console.log('opa');
-	}
-	else {
-		fac = mapData.points[index][2] / Math.pow(mapData.points[index][2] , 2);
-	}
-	return fac;
+function flattening(height, index, mapData) {
+	height = height / mapData.points[index][2];
+	height = Math.pow(height, 2);
+	height *= mapData.points[index][2];
+	if (isNaN(height))
+		console.count('wtf');
+	return height;
 }
 
 function mark_terrain(index, mapData) {
@@ -37,11 +30,10 @@ function mark_terrain(index, mapData) {
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let sqrRadius = Math.pow(radius, 2);
-	//let factor = compute_factor(index, mapData);
 	let factor = mapData.points[index][4];
 
-	if (Math.sqrt(mapData.points[index][2]) < radius)
-		console.log('ca me casse les ');
+	//if (Math.sqrt(mapData.points[index][2]) < radius)
+	//		console.log('ca me casse les ');
 
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
@@ -54,6 +46,7 @@ function mark_terrain(index, mapData) {
 					Math.pow(radius, 2) -
 					(Math.pow(brushX - centreX, 2) + Math.pow(brushY - centreY, 2));
 				newHeight *= factor;
+				newHeight = flattening(newHeight, index, mapData);
 				store_heat(brushX, brushY, index, newHeight, mapData);
 			}
 		}
@@ -71,23 +64,16 @@ function generate_heat_map(mapData) {
 			mapData.heat_map[i][j][0] = { z: 0, no_height: 1 };
 		}
 	}
-	//sort_closest_points(mapData);
 	for (let i = 0; i < mapData.points.length; i++) {
-		//if (i === mapData.breaktime) break ;	
 		// sets input points
 		mapData.heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
 			z: mapData.points[i][2],
 			index_origin: i,
 			no_height: 0,
 		};
-
-		// get biggest radius possible for each input point to prevent hills overriding input values
-		//compute_radius(i, mapData);
 		// marks heights of hills for each point
 		mark_terrain(i, mapData);
 	}
-	console.log("end of breaked generate heat map");
-	console.log(mapData.closest_points);
 }
 
 export default generate_heat_map;

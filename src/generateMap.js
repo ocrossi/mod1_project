@@ -8,125 +8,8 @@ function get_poly_index(index, mapData) {
 	);
 }
 
-// only compares x and y coordinates for 2 points, no z value included
-
-function distanceBetweenTwoPoints(t1, t2) {
-	return Math.sqrt(Math.pow(t2[0] - t1[0], 2) + Math.pow(t2[1] - t1[1], 2));
-}
-
-function get_closest_input_point(x, y, mapData, index) {
-	let dist = distanceBetweenTwoPoints(
-		[0, 0, 0],
-		[mapData.size_map, mapData.size_map, 0]
-	);
-	let ref = [x, y, 0];
-	let ref_index = -1;
-
-	for (let i = 0; i < mapData.points.length; i++) {
-		let point = [mapData.points[i][0], mapData.points[i][1], 0];
-		let curr_dist = distanceBetweenTwoPoints(ref, point);
-		if (curr_dist < dist && i !== index) {
-			ref_index = i;
-			dist = curr_dist;
-		}
-	}
-	return ref_index;
-}
-
-function manage_overlapping_hills(brushX, brushY, mapData, index, newHeight) {
-	let index_closest_point = get_closest_input_point(
-		brushX,
-		brushY,
-		mapData,
-		index
-	);
-	let dist_to_closest = distanceBetweenTwoPoints(length
-		[brushX, brushY, 0],
-		mapData.points[index_closest_point]
-	);
-	let dist_to_current = distanceBetweenTwoPoints(
-		[brushX, brushY, 0],
-		mapData.points[index]
-	);
-	let height_closest = mapData.points[index_closest_point][1];
-	let dist_current_closest = distanceBetweenTwoPoints(
-		mapData.points[index],
-		mapData.points[index_closest_point]
-	);
-	if (
-		dist_to_closest < height_closest &&
-		dist_current_closest > dist_to_current &&
-		dist_to_closest > 1
-	) {
-		newHeight = newHeight * (dist_to_closest / height_closest);
-		/*
-		console.group();
-		console.log("newHeight", newHeight);
-		console.log('dist_to_closest', dist_to_closest);
-		console.log('height_closest', height_closest);
-		console.log('dist_to_current', dist_to_current);
-		console.log('dist_current_closest', dist_current_closest);
-		console.groupEnd();
-		*/
-	}
-}
-
-
-
-function raise_terrain(mapData, index, points) {
-	let radius = mapData.points[index][2];
-	let centreX = mapData.points[index][0];
-	let centreY = mapData.points[index][1];
-	let targetHeight = mapData.points[index][2];
-	let deltaHeight = targetHeight;
-	//let deltaHeight = targetHeight - points[get_poly_index(index, mapData) + 2];
-	let sqrRadius = Math.pow(radius, 2);
-
-	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
-		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
-			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
-			if (sqrDstFromCenter <= sqrRadius) {
-				let dstFromCenter = Math.sqrt(sqrDstFromCenter);
-				let t = dstFromCenter / radius;
-				let brushWeight = Math.exp((-t * t) / mapData.brushFallOff);
-
-				let brushX = centreX + offsetX;
-				let brushY = centreY + offsetY;
-
-				let z_coord = 3 * (brushX * (mapData.size_map + 1) + brushY) + 2;
-				let newHeight = deltaHeight * brushWeight;
-
-				if (mapData.points.length > 1)
-					manage_overlapping_hills(brushX, brushY, mapData, index, newHeight);
-
-				if (newHeight < points[z_coord]) {
-					/*
-					console.group();
-					console.count("no one like you");
-					console.log("x : ", brushX);
-					console.log("y : ", brushY);
-					console.log("curr z", points[z_coord]);
-					console.log("newHeight", newHeight);
-					console.groupEnd();
-					*/
-				}
-				if (newHeight + points[z_coord] < newHeight) newHeight = 0;
-				points[z_coord] += newHeight;
-			}
-		}
-	}
-}
-
-function get_max_height(mapData) {
-	for (let i = 0; i < mapData.points.length; i++) {
-		if (mapData.points[i][2] > mapData.max_height)
-			mapData.max_height = mapData.points[i][2];
-	}
-}
-
 function check_validity(mapData, points) {
 	for (let i = 0; i < mapData.points.length; i++) {
-		//if (i === mapData.breaktime) break;
 		let pi = get_poly_index(i, mapData);
 		let z_input = mapData.points[i][2];
 		let z_map = points[pi + 2];
@@ -176,12 +59,6 @@ function generate_map(mapData, polyData) {
 
 	// elevates z coords using heat map
 	let z_index = 2;
-/*
-	let test = 13;
-	let t1 = mapData.points[test][0];
-	let t2 = mapData.points[test][1];
-	mapData.heat_map[t1][t2][0].z += 100;
-*/
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
 			points[z_index] = mapData.heat_map[i][j][0].z;

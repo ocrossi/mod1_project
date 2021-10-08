@@ -1,15 +1,11 @@
 import sort_closest_points from "./sortClosestPoint.js";
 
-function compute_height(coords, radius) {
-	let n_factor = radius / Math.pow(radius, 2);
-	if (coords.y_ref === 150)  {
-		console.log("wsh", n_factor)
-		console.log('rad', radius);
-	}
+function compute_height(coords, radius, c_factor) {
 	return (
 		(Math.pow(radius, 2) -
 			(Math.pow(coords.x_comp - coords.x_ref, 2) +
-				Math.pow(coords.y_comp - coords.y_ref, 2))) * n_factor 
+				Math.pow(coords.y_comp - coords.y_ref, 2))) 
+		* c_factor 
 	);
 }
 
@@ -17,19 +13,45 @@ function decrease_radius(point_ref, point_comp, max_height, coords, mapData) {
 	let r = mapData.points[point_ref][2] - 1;
 	let sqrt_max_height = Math.sqrt(max_height);
 	let c_factor = 0;
+	let i = 1;
+	
 	while (r > 1) {
 		r--;
-		//	c_factor = r / Math.pow(r, 2);
-		/*else*/ c_factor = mapData.points[point_ref][2] / Math.pow(r, 2);
+		if (mapData.points[point_ref][2] < Math.pow(r, 2))
+			i++;
+		c_factor = (r + i) / Math.pow(r, 2);
 		let c_height = compute_height(coords, r, c_factor);
-		console.log("cheight vs max_height : ", c_height, max_height);
 		if (c_height < max_height) break;
 	}	
-
 	return [r, c_factor];
 }
 
-function increase_radius(mapData) {}
+function check_bounds2(index, mapData) {
+	let bounds = [
+		mapData.points[index][0],
+		mapData.points[index][1],
+		mapData.size_map - mapData.points[index][0],
+		mapData.size_map - mapData.points[index][1],
+	];
+	let min = mapData.size_map;
+
+	for (let i = 0; i < 4; i++) {
+		min = bounds[i] < min ? bounds[i] : min;
+	}
+	return min;
+}
+
+function increase_radius(point_ref, coords, mapData) {
+	let r = mapData.points[point_ref][2];
+	let bound = check_bounds2(point_ref, mapData);
+	let c_factor = 1;
+
+	while (r < bound - 1 && r < mapData.closest_points[point_ref][0].dist - 1)
+		r++;
+	c_factor = mapData.points[point_ref][2] / Math.pow(r, 2);
+	if (r < Math.pow(r, 2)) console.log('PARKOUR');
+	return [r, c_factor];
+}
 
 function modify_radius(point_ref, idx_closest_tab, point_comp, mapData) {
 	let radius = mapData.points[point_ref][2];
@@ -46,24 +68,20 @@ function modify_radius(point_ref, idx_closest_tab, point_comp, mapData) {
 				Math.pow(coords.y_comp - coords.y_ref, 2)))
 		* normalisation_factor; // height of current hill at (x,y) for comp point
 	let max_height = mapData.points[point_comp][2] - 1;
+	let res = 0;
 	if (height > max_height) {
-	let res = decrease_radius(
+	res = decrease_radius(
 			point_ref,
 			point_comp,
 			max_height,
 			coords,
 			mapData
 		)
-		mapData.closest_points[point_ref][idx_closest_tab].radius = res[0];
-		mapData.closest_points[point_ref][idx_closest_tab].factor = res[1];
 	}
-	else {
-		mapData.closest_points[point_ref][idx_closest_tab].radius = mapData.points[point_ref][2];
-		mapData.closest_points[point_ref][idx_closest_tab].factor = mapData.points[point_ref][2] / Math.pow(mapData.points[point_ref][2], 2);
-		console.log('ELSE');
-		console.log(mapData.closest_points[point_ref][idx_closest_tab].radius);
-		console.log(mapData.closest_points[point_ref][idx_closest_tab].factor);
-	}
+	else res = increase_radius(point_ref, coords, mapData);	
+	mapData.closest_points[point_ref][idx_closest_tab].radius = res[0];
+	mapData.closest_points[point_ref][idx_closest_tab].factor = res[1];
+
 }
 
 function get_smallest_radius(index, mapData) {
@@ -99,7 +117,9 @@ function compute_biggest_radius(mapData) {
 function compute_hills_size(mapData) {
 	// returns instantly classic radius because there is no other point to compare
 	if (mapData.points.length === 1) {
+		let factor = mapData.points[0][2] / Math.pow(mapData.points[0][2], 2);
 		mapData.points[0].push(mapData.points[0][2]);
+		mapData.points[0].push(factor);
 		return;
 	}
 	sort_closest_points(mapData);
