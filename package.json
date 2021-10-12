@@ -20,7 +20,8 @@
   "homepage": "https://github.com/ocrossi/mod1_project#readme",
   "dependencies": {
     "@kitware/vtk.js": "^18.1.11",
-    "jquery": "^3.6.0"
+    "jquery": "^3.6.0",
+    "simplex-noise": "^3.0.0"
   },
   "devDependencies": {
     "html-loader": "^2.1.2",

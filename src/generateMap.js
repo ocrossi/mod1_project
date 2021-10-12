@@ -1,4 +1,5 @@
 import * as vtkMath from "@kitware/vtk.js/Common/Core/Math";
+import SimplexNoise from 'simplex-noise';
 
 function get_poly_index(index, mapData) {
 	return (
@@ -57,11 +58,18 @@ function generate_map(mapData, polyData) {
 		}
 	}
 
+	const simplex = new SimplexNoise();
 	// elevates z coords using heat map
 	let z_index = 2;
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
-			points[z_index] = mapData.heat_map[i][j][0].z;
+			var randnoise = simplex.noise3D(i, j, mapData.heat_map[i][j][0].z);
+			//console.log(randnoise);
+			if (mapData.heat_map[i][j][0].no_height === 0)
+				points[z_index] = mapData.heat_map[i][j][0].z + 2 * randnoise;
+			else
+				points[z_index] = mapData.heat_map[i][j][0].z;
+			//points[z_index] = randnoise * 3;
 			z_index += 3;
 		}
 	}
