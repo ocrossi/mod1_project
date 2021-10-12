@@ -17,11 +17,10 @@ function store_heat(x, y, index, newHeight, mapData) {
 }
 
 function flattening(height, index, mapData) {
+	if (mapData.points[index][2] === 0) return 0;
 	height = height / mapData.points[index][2];
 	height = Math.pow(height, 2);
 	height *= mapData.points[index][2];
-	if (isNaN(height))
-		console.count('wtf');
 	return height;
 }
 
@@ -53,6 +52,25 @@ function mark_terrain(index, mapData) {
 	}
 }
 
+function combine_heats(mapData) {
+	for (let i = 0; i < mapData.size_map; i++) {
+		for (let j = 0; j < mapData.size_map; j++) {
+			if (mapData.heat_map[i][j].length > 1) {
+				//console.log(mapData.heat_map[i][j]);
+				//return;
+				let index = mapData.heat_map[i][j][0].index_origin;
+				for (let k = 1; k < mapData.heat_map[i][j].length; k++) {
+					mapData.heat_map[i][j][0].z += mapData.heat_map[i][j][k].z;
+					mapData.heat_map[i][j][0].z =
+						mapData.heat_map[i][j][0].z > mapData.points[index][2]
+							? mapData.points[index][2]
+							: mapData.heat_map[i][j][0].z;
+				}
+			}
+		}
+	}
+}
+
 function generate_heat_map(mapData) {
 	mapData.heat_map = new Array(mapData.size_map + 1);
 
@@ -74,6 +92,7 @@ function generate_heat_map(mapData) {
 		// marks heights of hills for each point
 		mark_terrain(i, mapData);
 	}
+	combine_heats(mapData);
 }
 
 export default generate_heat_map;

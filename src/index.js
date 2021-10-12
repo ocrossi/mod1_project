@@ -19,7 +19,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 
-import inputFile from "raw-loader!../resources/demo3.mod1";
+import inputFile from "raw-loader!../resources/demo9.mod1";
 
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
@@ -62,7 +62,6 @@ function main() {
 		return;
 	}
 	set_size_map(mapData);
-	//mapData.points = [mapData.points[5]];
 	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
