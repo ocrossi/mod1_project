@@ -65,9 +65,9 @@ function generate_map(mapData, polyData) {
 		for (let j = 0; j <= mapData.size_map; j++) {
 			var randnoise = simplex.noise3D(i, j, mapData.heat_map[i][j][0].z);
 			//console.log(randnoise);
-			if (mapData.heat_map[i][j][0].no_height === 0)
-				points[z_index] = mapData.heat_map[i][j][0].z + 2 * randnoise;
-			else
+			//if (mapData.heat_map[i][j][0].no_height === 0)
+			//	points[z_index] = mapData.heat_map[i][j][0].z + 2 * randnoise;
+			//else
 				points[z_index] = mapData.heat_map[i][j][0].z;
 			//points[z_index] = randnoise * 3;
 			z_index += 3;
