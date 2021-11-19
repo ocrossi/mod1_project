@@ -18,15 +18,14 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-
-import inputFile from "raw-loader!../resources/demo4.mod1";
-
+import inputFile from "raw-loader!../resources/demo1.mod1";
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
 import compute_hills_size from './computeHillsSize.js'
 import generate_heat_map from './generateHeatMap.js';
 import generate_map from "./generateMap.js";
 import perlin_map from "./perlinMap.js";
+import generate_water from "./generateStillWater.js";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -41,13 +40,16 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // ----------------------------------------------------------------------------
 
 const polyData = vtkPolyData.newInstance();
+const waterPolyData = vtkPolyData.newInstance();
 
-let fluidData = {
-	fluid_array:  new Array(),
+
+let	fluidData =  {
+	fluid_array: [],
 };
 
+
 let fluidCube = {
-	size: 0,
+	size: 1,
 	// timestep: a voir
 	diffusion: 0,
 	viscosity: 0,
@@ -87,6 +89,7 @@ function main() {
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 	perlin_map(mapData);
+	generate_water(mapData, fluidData, waterPolyData);
 }
 
 main();
@@ -138,15 +141,20 @@ lookupTable.addRGBPoint(2, 0.5, 0.37, 0.3); //brown
 lookupTable.addRGBPoint(3, 1, 1, 1); //white
 lookupTable.build();
 
-const mapper = vtkMapper.newInstance({
+const mapMapper = vtkMapper.newInstance({
 	interpolateScalarsBeforeMapping: true,
 	colorMode: ColorMode.DEFAULT,
 	scalarMode: ScalarMode.DEFAULT,
 	useLookupTableScalarRange: true,
 	lookupTable,
 });
-const actor = vtkActor.newInstance();
-actor.setMapper(mapper);
+const mapActor = vtkActor.newInstance();
+mapActor.setMapper(mapMapper);
+
+// ! water ! //
+const waterActor = vtkActor.newInstance();
+const waterMapper = vtkMapper.newInstance();
+// ! water ! //
 
 const simpleFilter = vtkCalculator.newInstance();
 simpleFilter.setFormulaSimple(
@@ -158,7 +166,7 @@ simpleFilter.setFormulaSimple(
 ); // Our formula for z
 
 simpleFilter.setInputData(polyData);
-mapper.setInputConnection(simpleFilter.getOutputPort());
+mapMapper.setInputConnection(simpleFilter.getOutputPort());
 
 const outlineFilter = vtkOutlineFilter.newInstance();
 outlineFilter.setInputData(polyData);
@@ -168,7 +176,13 @@ const outlineActor = vtkActor.newInstance();
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
 outlineActor.setMapper(outlineMapper);
 
-renderer.addActor(actor);
+// ! water ! //
+waterActor.setMapper(waterMapper);
+renderer.addActor(waterActor);
+waterMapper.addInputData(waterPolyData);
+// ! water ! //
+
+renderer.addActor(mapActor);
 renderer.addActor(outlineActor);
 renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
@@ -179,7 +193,9 @@ renderWindow.render();
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;
 global.renderer = renderer;
-global.actor = actor;
-global.mapper = mapper;
+global.mapActor = mapActor;
+global.mapMapper = mapMapper;
+global.waterActor = waterActor;
+global.waterMapper = waterMapper;
 global.polyData = polyData;
 global.mapData = mapData;
