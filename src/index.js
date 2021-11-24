@@ -18,7 +18,7 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo1.mod1";
+import inputFile from "raw-loader!../resources/demo10.mod1";
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
 import compute_hills_size from './computeHillsSize.js'
@@ -26,6 +26,8 @@ import generate_heat_map from './generateHeatMap.js';
 import generate_map from "./generateMap.js";
 import perlin_map from "./perlinMap.js";
 import generate_water from "./generateStillWater.js";
+import { display_water } from "./fluidUtilities";
+import {newInstance} from "@kitware/vtk.js/Common/Core/DataArray";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -40,11 +42,12 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // ----------------------------------------------------------------------------
 
 const polyData = vtkPolyData.newInstance();
-const waterPolyData = vtkPolyData.newInstance();
+var waterPolyData = vtkPolyData.newInstance();
 
 
 let	fluidData =  {
 	fluid_array: [],
+	anim_time: 0,
 };
 
 
@@ -94,6 +97,8 @@ function main() {
 
 main();
 
+
+
 // -----------------------------------------------------------
 // UI control handling
 // -----------------------------------------------------------
@@ -133,14 +138,17 @@ function map_color(x) {
 	return 3;
 }
 
-// color table
+// ! color table ! //
 const lookupTable = vtkColorTransferFunction.newInstance();
 lookupTable.addRGBPoint(0, 1.0, 1.0, 0.0); // yellow
 lookupTable.addRGBPoint(1, 0.0, 1.0, 0.0); //green
 lookupTable.addRGBPoint(2, 0.5, 0.37, 0.3); //brown
 lookupTable.addRGBPoint(3, 1, 1, 1); //white
+lookupTable.addRGBPoint(4, 0, 0, 0.54); // deep blue
 lookupTable.build();
+// ! color table ! //
 
+// ! TERRAIN ! //
 const mapMapper = vtkMapper.newInstance({
 	interpolateScalarsBeforeMapping: true,
 	colorMode: ColorMode.DEFAULT,
@@ -150,11 +158,6 @@ const mapMapper = vtkMapper.newInstance({
 });
 const mapActor = vtkActor.newInstance();
 mapActor.setMapper(mapMapper);
-
-// ! water ! //
-const waterActor = vtkActor.newInstance();
-const waterMapper = vtkMapper.newInstance();
-// ! water ! //
 
 const simpleFilter = vtkCalculator.newInstance();
 simpleFilter.setFormulaSimple(
@@ -167,7 +170,9 @@ simpleFilter.setFormulaSimple(
 
 simpleFilter.setInputData(polyData);
 mapMapper.setInputConnection(simpleFilter.getOutputPort());
+// ! TERRAIN ! //
 
+// ! outline box ! //
 const outlineFilter = vtkOutlineFilter.newInstance();
 outlineFilter.setInputData(polyData);
 const outlineMapper = vtkMapper.newInstance();
@@ -176,19 +181,51 @@ const outlineActor = vtkActor.newInstance();
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
 outlineActor.setMapper(outlineMapper);
 
+// ! outline box ! //
+
+
 // ! water ! //
+const waterActor = vtkActor.newInstance();
+const waterMapper = vtkMapper.newInstance();
+
 waterActor.setMapper(waterMapper);
-renderer.addActor(waterActor);
-waterMapper.addInputData(waterPolyData);
+const waterFilter = vtkCalculator.newInstance();
+
+waterFilter.setFormulaSimple(
+	FieldDataTypes.POINT, // Generate an output array defined over points.
+	[], // We don't request any point-data arrays because point coordinates are made available by default.
+	"z", // Name the output array "z"
+	//(x) => (x[0] - 0.5) * (x[0] - 0.5) + (x[1] - 0.5) * (x[1] - 0.5) + 0.125
+	(x) => 4
+); // Our formula for z
+
+waterFilter.setInputData(waterPolyData);
+waterMapper.setInputConnection(waterFilter.getOutputPort());
 // ! water ! //
+
 
 renderer.addActor(mapActor);
 renderer.addActor(outlineActor);
+renderer.addActor(waterActor);
 renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
 renderer.resetCamera();
 renderWindow.render();
 //actor.getProperty().setWireframe(true);
+
+
+var intervalId = window.setInterval(function(){
+	waterPolyData = vtkPolyData.newInstance();
+	fluidData.anim_time += 1;
+	console.log("anim_time :", fluidData.anim_time);
+	display_water(fluidData, waterPolyData);
+	renderer.addActor(waterActor);
+
+	waterFilter.setInputData(waterPolyData);
+	waterMapper.setInputConnection(waterFilter.getOutputPort());
+	renderWindow.render();
+}, 1000);
+
 
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;
@@ -197,5 +234,6 @@ global.mapActor = mapActor;
 global.mapMapper = mapMapper;
 global.waterActor = waterActor;
 global.waterMapper = waterMapper;
+global.waterPolyData = waterPolyData;
 global.polyData = polyData;
 global.mapData = mapData;
