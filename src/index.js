@@ -18,7 +18,9 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo10.mod1";
+import inputFile from "raw-loader!../resources/demo4.mod1";
+//import inputFile from "raw-loader!../errors_resource/demo1.mod1";
+
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
 import compute_hills_size from './computeHillsSize.js'

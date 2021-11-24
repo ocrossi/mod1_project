@@ -43,8 +43,7 @@ function display_water(fluidData, waterPolyData) {
 		];
 		console.log(points);
 
-		waterPolyData.getPoints().setData(points, 3);
-
+	waterPolyData.getPoints().setData(points, 3);
 	//let polys = new Uint32Array(4 * numTriangles);
 	
 	//let polys = new Uint32Array(4 * numTriangles);
