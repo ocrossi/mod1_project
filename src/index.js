@@ -18,7 +18,7 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo4.mod1";
+import inputFile from "raw-loader!../resources/demo1.mod1";
 //import inputFile from "raw-loader!../errors_resource/demo1.mod1";
 
 import parse_input from "./parsing.js";
@@ -30,6 +30,8 @@ import perlin_map from "./perlinMap.js";
 import generate_water from "./generateStillWater.js";
 import { display_water } from "./fluidUtilities";
 import {newInstance} from "@kitware/vtk.js/Common/Core/DataArray";
+
+import test_memory from "./testMemoryMax";
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -95,6 +97,7 @@ function main() {
 	generate_map(mapData, polyData);
 	perlin_map(mapData);
 	generate_water(mapData, fluidData, waterPolyData);
+	test_memory();
 }
 
 main();
@@ -182,9 +185,7 @@ const outlineActor = vtkActor.newInstance();
 
 outlineMapper.setInputConnection(outlineFilter.getOutputPort());
 outlineActor.setMapper(outlineMapper);
-
 // ! outline box ! //
-
 
 // ! water ! //
 const waterActor = vtkActor.newInstance();
@@ -206,6 +207,7 @@ waterMapper.setInputConnection(waterFilter.getOutputPort());
 // ! water ! //
 
 
+// add objects to scene, move camera and render
 renderer.addActor(mapActor);
 renderer.addActor(outlineActor);
 renderer.addActor(waterActor);
@@ -215,7 +217,7 @@ renderer.resetCamera();
 renderWindow.render();
 //actor.getProperty().setWireframe(true);
 
-
+/*
 var intervalId = window.setInterval(function(){
 	waterPolyData = vtkPolyData.newInstance();
 	fluidData.anim_time += 1;
@@ -227,7 +229,7 @@ var intervalId = window.setInterval(function(){
 	waterMapper.setInputConnection(waterFilter.getOutputPort());
 	renderWindow.render();
 }, 1000);
-
+*/
 
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;

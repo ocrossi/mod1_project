@@ -33,13 +33,22 @@ function display_water(fluidData, waterPolyData) {
 //	let points = new Float64Array(nbPoints * 3);
 		let points = [
 			0, 0, 0 + fluidData.anim_time,
-			0, 0, 0.5 + fluidData.anim_time,
-			0, 0.5, 0 + fluidData.anim_time,
-			0, 0.5, 0.5 + fluidData.anim_time,
-			0.5, 0, 0 + fluidData.anim_time,
-			0.5, 0, 0.5 + fluidData.anim_time,
-			0.5, 0.5, 0 + fluidData.anim_time,
-			0.5, 0.5, 0.5 + fluidData.anim_time
+			0, 0, 1 + fluidData.anim_time,
+			0, 1, 0 + fluidData.anim_time,
+			0, 1, 1 + fluidData.anim_time,
+			1, 0, 0 + fluidData.anim_time,
+			1, 0, 1 + fluidData.anim_time,
+			1, 1, 0 + fluidData.anim_time,
+			1, 1, 1 + fluidData.anim_time,
+			// try adding another cube for discontinuity
+			5, 0, 0 + fluidData.anim_time,
+			5, 0, 1 + fluidData.anim_time,
+			5, 1, 0 + fluidData.anim_time,
+			5, 1, 1 + fluidData.anim_time,
+			6, 0, 0 + fluidData.anim_time,
+			6, 0, 1 + fluidData.anim_time,
+			6, 1, 0 + fluidData.anim_time,
+			6, 1, 1 + fluidData.anim_time
 		];
 		console.log(points);
 
@@ -57,6 +66,7 @@ function display_water(fluidData, waterPolyData) {
 		4, 1, 3, 7, 5,
 	];
 	*/
+	let offset = 8;
 	let polys = [
 		3, 0, 1, 5,
 		3, 0, 5, 4,
@@ -70,6 +80,19 @@ function display_water(fluidData, waterPolyData) {
 		3, 1, 5, 7,
 		3, 0, 2, 4,
 		3, 2, 4, 6,
+		// 
+		3, 0 + offset, 1 + offset, 5 + offset,
+		3, 0 + offset, 5 + offset, 4 + offset,
+		3, 0 + offset, 1 + offset, 3 + offset,
+		3, 0 + offset, 3 + offset, 2 + offset,
+		3, 2 + offset, 3 + offset, 7 + offset,
+		3, 2 + offset, 7 + offset, 6 + offset,
+		3, 4 + offset, 5 + offset, 7 + offset,
+		3, 7 + offset, 4 + offset, 6 + offset,
+		3, 1 + offset, 3 + offset, 5 + offset,
+		3, 1 + offset, 5 + offset, 7 + offset,
+		3, 0 + offset, 2 + offset, 4 + offset,
+		3, 2 + offset, 4 + offset, 6 + offset,
 	];
 	waterPolyData.getPolys().setData(polys, 1);
 }
