@@ -18,7 +18,8 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo1.mod1";
+//import inputFile from "raw-loader!../resources/demo10.mod1";
+import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
 //import inputFile from "raw-loader!../errors_resource/demo1.mod1";
 
 import parse_input from "./parsing.js";
@@ -97,7 +98,7 @@ function main() {
 	generate_map(mapData, polyData);
 	perlin_map(mapData);
 	generate_water(mapData, fluidData, waterPolyData);
-	test_memory();
+	//test_memory();
 }
 
 main();
@@ -210,7 +211,7 @@ waterMapper.setInputConnection(waterFilter.getOutputPort());
 // add objects to scene, move camera and render
 renderer.addActor(mapActor);
 renderer.addActor(outlineActor);
-renderer.addActor(waterActor);
+//renderer.addActor(waterActor);
 renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
 renderer.resetCamera();
@@ -241,3 +242,4 @@ global.waterMapper = waterMapper;
 global.waterPolyData = waterPolyData;
 global.polyData = polyData;
 global.mapData = mapData;
+global.fluidData = fluidData;
