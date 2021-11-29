@@ -80,6 +80,14 @@ let mapData = {
 	input: "",
 };
 
+/*
+ * Marching cubes playground
+ */
+
+const sphereSource = vtkSphereSource.newInstance();
+
+
+
 function main() {
 	mapData.input = inputFile;
 
@@ -201,6 +209,7 @@ waterFilter.setFormulaSimple(
 
 waterFilter.setInputData(waterPolyData);
 waterMapper.setInputConnection(waterFilter.getOutputPort());
+
 // ! water ! //
 
 
@@ -227,6 +236,14 @@ var intervalId = window.setInterval(function(){
 }, 1000);
 
 
+// ! Marchin Cubes ! //
+const marchingCubesMapper = vtkMapper.newInstance();
+const marchingCubesActor = vtkMapper.newInstance();
+
+marchingCubesMapper.setInputConnection(sphereSource.getOututPort());
+marchingCubesActor.setMapper(marchingCubesMapper)
+
+// ! Global ! //
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;
 global.renderer = renderer;
