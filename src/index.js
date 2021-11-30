@@ -5,34 +5,28 @@ import vtkFullScreenRenderWindow from "@kitware/vtk.js/Rendering/Misc/FullScreen
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
 import vtkPolyData from "@kitware/vtk.js/Common/DataModel/PolyData.js";
-import vtkPlaneSource from "@kitware/vtk.js/Filters/Sources/PlaneSource";
-import { Representation } from "@kitware/vtk.js/Rendering/Core/Property/Constants";
-
 import vtkCalculator from "@kitware/vtk.js/Filters/General/Calculator";
 import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
-import { AttributeTypes } from "@kitware/vtk.js/Common/DataModel/DataSetAttributes/Constants";
-import vtkLookupTable from "@kitware/vtk.js/Common/Core/LookupTable";
 import vtkDataSet from "@kitware/vtk.js/Common/DataModel/DataSet";
 const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-//import inputFile from "raw-loader!../resources/demo10.mod1";
-import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
-//import inputFile from "raw-loader!../errors_resource/demo1.mod1";
+import inputFile from "raw-loader!../resources/demo4.mod1";
+//import inputFile from "raw-loader!../resources/demolimittesting.mod1";
+//import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
 
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
 import compute_hills_size from './computeHillsSize.js'
 import generate_heat_map from './generateHeatMap.js';
-import generate_map from "./generateMap.js";
+import generate_map from "./generateScaleMap.js";
 import perlin_map from "./perlinMap.js";
 import generate_water from "./generateStillWater.js";
 import { display_water } from "./fluidUtilities";
-import {newInstance} from "@kitware/vtk.js/Common/Core/DataArray";
 
-import test_memory from "./testMemoryMax";
+import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -50,11 +44,14 @@ const polyData = vtkPolyData.newInstance();
 var waterPolyData = vtkPolyData.newInstance();
 
 
-let	fluidData =  {
+let	fluidData = {
 	fluid_array: [],
+	map_topo: [],
 	anim_time: 0,
 };
 
+
+let sphere = vtkSphere.newInstance();
 
 let fluidCube = {
 	size: 1,
@@ -74,15 +71,19 @@ let fluidCube = {
 
 let mapData = {
 	size_map: 0,
-	brushFallOff: 0.2, 
+	res_offset: 1,
+	resolution_max: 199,
 	bounds_multiplier: 1,
 	max_height: 0,
 	size_multiplier: 1,
-	size_max: 1000000000,
+	size_max: 1000000,
 	points: new Array(),
-	closest_points: new Array(),
-	heat_map: new Array(),
-	input: "",
+	closest_points: new Array(), // no need to define here, memory mismanagment
+	heat_map: new Array(), // no need
+	input: "", // only for parsing, could be destroyed afterwards
+	unit_length: 1, // voxel length compared to coordinates system
+	res_flag: true,
+	combine_heats: true
 };
 
 function main() {
@@ -96,9 +97,7 @@ function main() {
 	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
-	perlin_map(mapData);
-	generate_water(mapData, fluidData, waterPolyData);
-	//test_memory();
+	generate_water(mapData, fluidData);
 }
 
 main();

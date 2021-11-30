@@ -1,2 +1,17 @@
+PARSING
+
 probleme parsing si (x, y, z1) (x, y, z2)
 soit considerer uniquement le pt le plus haut, sinon erreur
+ajouter limite hauteur
+check extension fichier === .mod1
+
+
+MAP GENERATION
+implementer map algo avec random hills
+implementer maps en noise
+ajouter map swap dans UI
+regler pb demo1 sur branche w_o 
+
+WATER
+generer tableau ints pour representer map en 3D
+test cas d utilisation de memoires sur grosses maps

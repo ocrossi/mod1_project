@@ -1,6 +1,3 @@
-import * as vtkMath from "@kitware/vtk.js/Common/Core/Math";
-import sort_closest_points from "./sortClosestPoint.js";
-
 function store_heat(x, y, index, newHeight, mapData) {
 	let heat = {
 		z: newHeight,
@@ -31,9 +28,6 @@ function mark_terrain(index, mapData) {
 	let sqrRadius = Math.pow(radius, 2);
 	let factor = mapData.points[index][4];
 
-	//if (Math.sqrt(mapData.points[index][2]) < radius)
-	//		console.log('ca me casse les ');
-
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);
@@ -52,12 +46,12 @@ function mark_terrain(index, mapData) {
 	}
 }
 
+
+// adds height to overlapping hills 
 function combine_heats(mapData) {
 	for (let i = 0; i < mapData.size_map; i++) {
 		for (let j = 0; j < mapData.size_map; j++) {
 			if (mapData.heat_map[i][j].length > 1) {
-				//console.log(mapData.heat_map[i][j]);
-				//return;
 				let index = mapData.heat_map[i][j][0].index_origin;
 				for (let k = 1; k < mapData.heat_map[i][j].length; k++) {
 					mapData.heat_map[i][j][0].z += mapData.heat_map[i][j][k].z;
@@ -71,6 +65,7 @@ function combine_heats(mapData) {
 	}
 }
 
+// compute each hill height to combine overlap results
 function generate_heat_map(mapData) {
 	mapData.heat_map = new Array(mapData.size_map + 1);
 
@@ -92,7 +87,8 @@ function generate_heat_map(mapData) {
 		// marks heights of hills for each point
 		mark_terrain(i, mapData);
 	}
-	combine_heats(mapData);
+	if (mapData.combine_heats === true)
+		combine_heats(mapData);
 }
 
 export default generate_heat_map;

@@ -41,14 +41,14 @@ function display_water(fluidData, waterPolyData) {
 			1, 1, 0 + fluidData.anim_time,
 			1, 1, 1 + fluidData.anim_time,
 			// try adding another cube for discontinuity
-			5, 0, 0 + fluidData.anim_time,
+/*			5, 0, 0 + fluidData.anim_time,
 			5, 0, 1 + fluidData.anim_time,
 			5, 1, 0 + fluidData.anim_time,
 			5, 1, 1 + fluidData.anim_time,
 			6, 0, 0 + fluidData.anim_time,
 			6, 0, 1 + fluidData.anim_time,
 			6, 1, 0 + fluidData.anim_time,
-			6, 1, 1 + fluidData.anim_time
+			6, 1, 1 + fluidData.anim_time*/
 		];
 		console.log(points);
 
@@ -81,7 +81,7 @@ function display_water(fluidData, waterPolyData) {
 		3, 0, 2, 4,
 		3, 2, 4, 6,
 		// 
-		3, 0 + offset, 1 + offset, 5 + offset,
+/*		3, 0 + offset, 1 + offset, 5 + offset,
 		3, 0 + offset, 5 + offset, 4 + offset,
 		3, 0 + offset, 1 + offset, 3 + offset,
 		3, 0 + offset, 3 + offset, 2 + offset,
@@ -92,7 +92,7 @@ function display_water(fluidData, waterPolyData) {
 		3, 1 + offset, 3 + offset, 5 + offset,
 		3, 1 + offset, 5 + offset, 7 + offset,
 		3, 0 + offset, 2 + offset, 4 + offset,
-		3, 2 + offset, 4 + offset, 6 + offset,
+		3, 2 + offset, 4 + offset, 6 + offset,*/
 	];
 	waterPolyData.getPolys().setData(polys, 1);
 }

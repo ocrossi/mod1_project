@@ -71,7 +71,6 @@ function sort_input_tab(mapData) {
 	}
 }
 
-
 function set_size_map(mapData) {
 	let bounds = {};
 	setBounds(bounds, mapData, 0);

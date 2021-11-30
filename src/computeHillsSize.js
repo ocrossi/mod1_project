@@ -9,9 +9,8 @@ function compute_height(coords, radius, c_factor) {
 	);
 }
 
-function decrease_radius(point_ref, point_comp, max_height, coords, mapData) {
+function decrease_radius(point_ref, max_height, coords, mapData) {
 	let r = mapData.points[point_ref][2] - 1;
-	let sqrt_max_height = Math.sqrt(max_height);
 	let c_factor = 0;
 	let i = 1;
 	
@@ -26,7 +25,7 @@ function decrease_radius(point_ref, point_comp, max_height, coords, mapData) {
 	return [r, c_factor];
 }
 
-function check_bounds2(index, mapData) {
+function check_bounds(index, mapData) {
 	let bounds = [
 		mapData.points[index][0],
 		mapData.points[index][1],
@@ -43,13 +42,12 @@ function check_bounds2(index, mapData) {
 
 function increase_radius(point_ref, coords, mapData) {
 	let r = mapData.points[point_ref][2];
-	let bound = check_bounds2(point_ref, mapData);
+	let bound = check_bounds(point_ref, mapData);
 	let c_factor = 1;
 
 	while (r < bound - 1 && r < mapData.closest_points[point_ref][0].dist - 1)
 		r++;
 	c_factor = mapData.points[point_ref][2] / Math.pow(r, 2);
-	if (r < Math.pow(r, 2)) console.log('PARKOUR');
 	return [r, c_factor];
 }
 
@@ -72,7 +70,6 @@ function modify_radius(point_ref, idx_closest_tab, point_comp, mapData) {
 	if (height > max_height) {
 	res = decrease_radius(
 			point_ref,
-			point_comp,
 			max_height,
 			coords,
 			mapData
@@ -100,9 +97,6 @@ function get_smallest_radius(index, mapData) {
 
 
 function compute_biggest_radius(mapData) {
-	//console.log('in compute biggest radius lets check closest points');
-	//console.log(mapData.closest_points);
-	//closest_point tabs all same length
 	for (let i = 0; i < mapData.points.length; i++) {
 		for (let j = 0; j < mapData.closest_points[0].length; j++) {
 			let idx_comp = mapData.closest_points[i][j].idx;
@@ -114,8 +108,9 @@ function compute_biggest_radius(mapData) {
 	}
 }
 
+// check each hill with its surroundings to determine a radius that avoids overlap
+// on other input points
 function compute_hills_size(mapData) {
-	// returns instantly classic radius because there is no other point to compare
 	if (mapData.points.length === 1) {
 		let factor = mapData.points[0][2] / Math.pow(mapData.points[0][2], 2);
 		mapData.points[0].push(mapData.points[0][2]);
@@ -124,6 +119,8 @@ function compute_hills_size(mapData) {
 	}
 	sort_closest_points(mapData);
 	compute_biggest_radius(mapData);
+	if (mapData.size_map % 2 === 1)
+		mapData.size_map++;
 }
 
 export default compute_hills_size;
