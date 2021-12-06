@@ -40,9 +40,9 @@ function allocate_terrain_topography(fluidData, mapData) {
 
 
 // preps data for water computation
-function generate_water(mapData, fluidData) {
+function generate_water_grid(mapData, fluidData) {
 	fluidData.height = mapData.points[mapData.points.length - 1][2] / mapData.unit_length;
 	allocate_terrain_topography(fluidData, mapData);
 }
 
-export default generate_water;
+export default generate_water_grid;

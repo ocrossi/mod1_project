@@ -13,11 +13,20 @@ function store_heat(x, y, index, newHeight, mapData) {
 	}
 }
 
-function flattening(height, index, mapData) {
+function square_flattening(height, index, mapData) {
 	if (mapData.points[index][2] === 0) return 0;
 	height = height / mapData.points[index][2];
 	height = Math.pow(height, 2);
 	height *= mapData.points[index][2];
+	return height;
+}
+
+function sigmoid_flattening(height, index, mapData) {
+	if (mapData.points[index][2] === 0) return 0;
+	height /= mapData.points[index][2]; // range [0, max_height] to [0, 1]
+	height = (height * 2) - 1; // swaps height from range [0, 1] to [-1, 1]
+	height = 1 / (1 + Math.exp(-5 * height));
+	height *= mapData.points[index][2]; // back to range [0, max]
 	return height;
 }
 
@@ -39,7 +48,8 @@ function mark_terrain(index, mapData) {
 					Math.pow(radius, 2) -
 					(Math.pow(brushX - centreX, 2) + Math.pow(brushY - centreY, 2));
 				newHeight *= factor;
-				newHeight = flattening(newHeight, index, mapData);
+				newHeight = square_flattening(newHeight, index, mapData);
+				newHeight = sigmoid_flattening(newHeight, index, mapData);
 				store_heat(brushX, brushY, index, newHeight, mapData);
 			}
 		}

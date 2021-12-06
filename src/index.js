@@ -23,7 +23,7 @@ import compute_hills_size from './computeHillsSize.js'
 import generate_heat_map from './generateHeatMap.js';
 import generate_map from "./generateScaleMap.js";
 import perlin_map from "./perlinMap.js";
-import generate_water from "./generateStillWater.js";
+import generate_water_grid from "./generateStillWater.js";
 import { display_water } from "./fluidUtilities";
 
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
@@ -50,8 +50,6 @@ let	fluidData = {
 	anim_time: 0,
 };
 
-
-let sphere = vtkSphere.newInstance();
 
 let fluidCube = {
 	size: 1,
@@ -97,7 +95,7 @@ function main() {
 	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
-	generate_water(mapData, fluidData);
+	generate_water_grid(mapData, fluidData);
 }
 
 main();
