@@ -22,9 +22,11 @@ function unit_voxel_intersection(floor, index_1D, mapData) {
 		return 3; // current unit square below terrain
 	if (isWall !== 0)
 		return 2; // terrain intersection
-	return 0; // empty, could be water in future
-	
+	return { type: 0, particles: [], size: 0 }; // empty, could be water in future
+// particle tab?	
 }
+
+let test = 0;
 
 // browse map with a unit voxel to detect empty space, walls and terrain
 function allocate_terrain_topography(fluidData, mapData) {
@@ -34,6 +36,8 @@ function allocate_terrain_topography(fluidData, mapData) {
 		fluidData.map_topo[i] = new Array(fluidData.length_one_floor);
 		for (let j = 0; j < fluidData.length_one_floor; j++) {
 			fluidData.map_topo[i][j] = unit_voxel_intersection(i, j, mapData);
+			if (typeof fluidData.map_topo[i][j] === 'object')
+				test++;
 		}
 	}
 }
@@ -43,6 +47,7 @@ function allocate_terrain_topography(fluidData, mapData) {
 function generate_water_grid(mapData, fluidData) {
 	fluidData.height = mapData.points[mapData.points.length - 1][2] / mapData.unit_length;
 	allocate_terrain_topography(fluidData, mapData);
+	console.log('how much empty squares : ', test);
 }
 
 export default generate_water_grid;

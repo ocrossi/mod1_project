@@ -48,8 +48,10 @@ function mark_terrain(index, mapData) {
 					Math.pow(radius, 2) -
 					(Math.pow(brushX - centreX, 2) + Math.pow(brushY - centreY, 2));
 				newHeight *= factor;
-				newHeight = square_flattening(newHeight, index, mapData);
-				newHeight = sigmoid_flattening(newHeight, index, mapData);
+				if (mapData.square_flattening === true)
+					newHeight = square_flattening(newHeight, index, mapData);
+				if (mapData.sigmoid_flattening === true)
+					newHeight = sigmoid_flattening(newHeight, index, mapData);
 				store_heat(brushX, brushY, index, newHeight, mapData);
 			}
 		}
