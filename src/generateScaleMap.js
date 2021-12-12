@@ -53,11 +53,16 @@ function change_resolution(mapData) {
 		mapData.resolution_max--;
 		mapData.res_offset = mapData.size_map / mapData.resolution_max;
 	}
+	mapData.unit_length = mapData.res_offset;
 }
 
 
 // sets data height to display map
 function generate_map(mapData, polyData) {
+	if (mapData.size_map > mapData.resolution_max && mapData.res_flag === true) {
+		change_resolution(mapData);
+	}
+
 	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
 	let numPlanes = (mapData.size_map * mapData.size_map) / mapData.res_offset;
 
@@ -66,10 +71,6 @@ function generate_map(mapData, polyData) {
 
 	let polys = new Uint32Array(5 * numPlanes);
 	polyData.getPolys().setData(polys, 1);
-
-	if (mapData.size_map > mapData.resolution_max && mapData.res_flag === true) {
-		change_resolution(mapData);
-	}
 	mapData.normals = new Array(numPlanes * 2); // 1 plane composed of 2 triangles
 	let idx = 0;
 	let z_index = 2;

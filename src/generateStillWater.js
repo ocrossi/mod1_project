@@ -1,4 +1,4 @@
-// checks corner coords of unit voxel to deterine terrain type
+// checks corner coords of unit voxel to determine terrain type
 function unit_voxel_intersection(floor, index_1D, mapData) {
 	let x = Math.trunc(index_1D / (mapData.size_map / mapData.unit_length)) * mapData.unit_length;
 	let y = (index_1D  % (mapData.size_map / mapData.unit_length)) * mapData.unit_length;

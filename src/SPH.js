@@ -305,13 +305,18 @@ class PointConstraint extends AbstractConstraint {
 
 class Grid {
 
-  constructor(grid_size, length, height, fluidData) {
+  constructor(grid_size, length, height, mapData, fluidData) {
     this.grid_size = grid_size;
+		//this.grid_size = mapData.unit_length;
 		this.height = height;
+		//this.height = mapData.height ??;
     this.grid_size_squared = this.grid_size * this.grid_size;
-    this.grid_count_x = Math.ceil(length / this.grid_size); // rate le tableau d etage est en 1d
-    this.grid_count_y = Math.ceil(length / this.grid_size);
-		this.grid_count_z = Math.ceil(height / this.height)
+    //this.grid_count_x = Math.ceil(length / this.grid_size); // rate le tableau d etage est en 1d
+    this.grid_count_x = mapData.size_map; // rate le tableau d etage est en 1d
+    //this.grid_count_y = Math.ceil(length / this.grid_size);
+    this.grid_count_y = mapData.size_map;
+		//this.grid_count_z = Math.ceil(height / this.height)
+		this.grid_count_z = fluidData.map_topo.length;
 		this.elements = fluidData.map_topo;
 		//for (let i = 0; i < )
 
@@ -326,11 +331,19 @@ class Grid {
 		*/
   }
 
+	// il faut transformer le map_topo en tableau 3D, ce sera bcp plus factile pr la suite
   add_item(particle) {
-    let grid_index_x = Math.floor(particle.pos.x / this.grid_size);
-    let grid_index_y = Math.floor(particle.pos.y / this.grid_size);
-		let grid_index_z = Math.floor(particle.pos_z / this.height);
+    //let grid_index_x = Math.floor(particle.pos.x / this.grid_size);
+    //let grid_index_y = Math.floor(particle.pos.y / this.grid_size);
+		let grid_idx_floor = Math.floor(particle.pos_x) * (this.grid_count_x) + Math.floor(particle.pos_y);
+		let grid_idx_height = particle.pos_z;
+
+		//let grid_index_z = Math.floor(particle.pos_z / this.height);
+		let grid_index_z = Math.floor(particle.pos_z);
     // cdo to force particles in the grid
+		if (typeof this.elements[grid_idx_height][grid_idx_floor] ===  'number' && this.elements[grid_index_x][grid_index_y][grid_index_z] === 3)
+			console.log('probelm add item dans une cellule terrain plein');
+/*
 		if (grid_index_x < 0) {
       grid_index_x = 0;
     } else if (grid_index_x > (this.grid_count_x - 1)) {
@@ -347,20 +360,23 @@ class Grid {
 		}
 		else if (grid_index_z < (this.grid_count_z - 1))
 			grid_index_z = this.grid_count_z - 1;
-    
+ */
+		if (grid_idx_floor < 0)
+			grid_idx_floor
 
 		if (this.elements[grid_index_x][grid_index_y][grid_index_z].particles.length < this.elements[grid_index_x][grid_index_y][grid_index_z].size) {
       this.elements[grid_index_x][grid_index_x][grid_index_z].particles.push(particle);
     } else {
-      this.elements[grid_index_x][grid_index_y].particles[this.elements[grid_index_x][grid_index_y].size] = particle;
+      this.elements[grid_index_x][grid_index_y][grid_index_z].particles[this.elements[grid_index_x][grid_index_y][grid_index_z].size] = particle;
     }
-    this.elements[grid_index_x][grid_index_y].size = this.elements[grid_index_x][grid_index_y].size + 1;
+    this.elements[grid_index_x][grid_index_y][grid_index_z].size = this.elements[grid_index_x][grid_index_y][grid_index_z].size + 1;
   }
 
   clear() {
-    for (let i = 0; i < this.grid_count_x; i++) {
-      for (let j = 0; j < this.grid_count_y; j++) {
-        this.elements[i][j].size = 0; // Don't clear array, just overwrite and keep track of virtual end of array
+    for (let i = 0; i < this.grid_count_z; i++) {
+      for (let j = 0; j < this.grid_size_squared; j++) {
+				if (typeof this.elements[i][j] === 'object')
+					this.elements[i][j].size = 0; // Don't clear array, just overwrite and keep track of virtual end of array
       }
     }
   }

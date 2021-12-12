@@ -13,7 +13,7 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo5.mod1";
+import inputFile from "raw-loader!../resources/demo10.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
 //import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
 
@@ -80,10 +80,10 @@ let mapData = {
 	heat_map: new Array(), // no need
 	input: "", // only for parsing, could be destroyed afterwards
 	unit_length: 1, // voxel length compared to coordinates system
-	res_flag: false,
+	res_flag: true,
 	combine_heats: false,
-	square_flattening: false,
-	sigmoid_flattening: false,
+	square_flattening: true,
+	sigmoid_flattening: true,
 };
 
 function main() {

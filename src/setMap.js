@@ -15,6 +15,7 @@ function update_bounds(bounds, mapData, index) {
 }
 
 function grow_map(mapData) {
+console.log('wait?');
 	while (mapData.size_map > 100) {
 		mapData.size_map *= 10;
 		mapData.size_multiplier *= 10;

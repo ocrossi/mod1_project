@@ -4,13 +4,13 @@ probleme parsing si (x, y, z1) (x, y, z2)
 soit considerer uniquement le pt le plus haut, sinon erreur
 ajouter limite hauteur
 check extension fichier === .mod1
-
+faire resize de la map apres increase/decrease radius.
+sortir heat_map et closest_points de mapData et ne recup que les resultats -> mem
 
 MAP GENERATION
 implementer map algo avec random hills
 implementer maps en noise
 ajouter map swap dans UI
-regler pb demo1 sur branche w_o 
 
 WATER
 generer tableau ints pour representer map en 3D
