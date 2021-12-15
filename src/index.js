@@ -1,4 +1,4 @@
-import "@kitware/vtk.js/Rendering/Profiles/Geometry";
+;import "@kitware/vtk.js/Rendering/Profiles/Geometry";
 import "@kitware/vtk.js/macro.js";
 
 import vtkFullScreenRenderWindow from "@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow";
@@ -16,6 +16,10 @@ import controlPanel from "./controlPanel.html";
 import inputFile from "raw-loader!../resources/demo10.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
 //import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
+
+/* refonte du main */
+import create_map_dimensions from "./createMapDimensions.js";
+/*******************/
 
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
@@ -82,7 +86,7 @@ let mapData = {
 	unit_length: 1, // voxel length compared to coordinates system
 	res_flag: true,
 	combine_heats: false,
-	square_flattening: true,
+	square_flattening: false,
 	sigmoid_flattening: true,
 };
 
@@ -93,11 +97,12 @@ function main() {
 		console.error("input parsing failure");
 		return;
 	}
+	create_map_dimensions(mapData);
 	set_size_map(mapData);
 	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
-	generate_water_grid(mapData, fluidData);
+//	generate_water_grid(mapData, fluidData);
 }
 
 main();

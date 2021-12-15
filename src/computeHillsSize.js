@@ -41,6 +41,7 @@ function check_bounds(index, mapData) {
 }
 
 function increase_radius(point_ref, coords, mapData) {
+	console.log('INCREASE RADIUS ALGO CLASSIQUE');
 	let r = mapData.points[point_ref][2];
 	let bound = check_bounds(point_ref, mapData);
 	let c_factor = 1;
@@ -78,7 +79,6 @@ function modify_radius(point_ref, idx_closest_tab, point_comp, mapData) {
 	else res = increase_radius(point_ref, coords, mapData);	
 	mapData.closest_points[point_ref][idx_closest_tab].radius = res[0];
 	mapData.closest_points[point_ref][idx_closest_tab].factor = res[1];
-
 }
 
 function get_smallest_radius(index, mapData) {
@@ -117,7 +117,7 @@ function compute_hills_size(mapData) {
 		mapData.points[0].push(factor);
 		return;
 	}
-	sort_closest_points(mapData);
+	mapData.closest_points = sort_closest_points(mapData);
 	compute_biggest_radius(mapData);
 	if (mapData.size_map % 2 === 1)
 		mapData.size_map++;
