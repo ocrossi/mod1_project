@@ -77,10 +77,12 @@ function generate_map(mapData, polyData) {
 	// sets heights using heat map
 	for (let i = 0; i <= mapData.size_map; i++) {
 		for (let j = 0; j <= mapData.size_map; j++) {
+			//console.log('i', i);
+			//console.log('j', j);
 			points[idx * 3] = i;
 			points[idx * 3 + 1] = j;
 		//	points[idx * 3 + 2] = 0; // z coords
-			points[z_index] = mapData.heat_map[i][j][0].z;
+			points[z_index] = mapData.height_map[i][j];
 			z_index += 3;
 			idx++;
 		}

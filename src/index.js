@@ -13,9 +13,9 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo10.mod1";
+import inputFile from "raw-loader!../resources/demobounds.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
-//import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
+//import inputFile from "raw-loader!../resources/demo5.mod1";
 
 /* refonte du main */
 import create_map_dimensions from "./createMapDimensions.js";
@@ -97,9 +97,10 @@ function main() {
 		console.error("input parsing failure");
 		return;
 	}
+	console.log("dans index : ", mapData.points);
 	create_map_dimensions(mapData);
-	set_size_map(mapData);
-	compute_hills_size(mapData);
+	//set_size_map(mapData);
+	//compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
 //	generate_water_grid(mapData, fluidData);

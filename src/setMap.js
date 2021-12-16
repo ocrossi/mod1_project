@@ -1,4 +1,5 @@
 function setBounds(bounds, mapData, index) {
+	console.log('bound mult', mapData.bounds_multiplier);
 	bounds.xmin = (mapData.points[index][0] - mapData.points[index][2]) * mapData.bounds_multiplier;
 	bounds.xmax = (mapData.points[index][0] + mapData.points[index][2]) * mapData.bounds_multiplier;
 	bounds.ymin = (mapData.points[index][1] - mapData.points[index][2]) * mapData.bounds_multiplier;
@@ -75,12 +76,17 @@ function sort_input_tab(mapData) {
 function set_size_map(mapData) {
 	let bounds = {};
 	setBounds(bounds, mapData, 0);
+	console.log('bounds', bounds);
 	for (let i = 1; i < mapData.points.length; i++) {
 		update_bounds(bounds, mapData, i);
 	}
 	mapData.size_map = Math.max(bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin);
+	console.log('algo normal b4 mapCoords_to_worldCoords', mapData.points);
+	console.log('bounds', bounds);
+
 	resize_map(mapData, bounds);
 	mapCoords_to_worldCoords(mapData, bounds);
+	console.log('after ', mapData.points);
 	sort_input_tab(mapData);
 }
 

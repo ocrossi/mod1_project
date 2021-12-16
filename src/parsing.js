@@ -13,7 +13,9 @@ function store_point(text, mapData) {
 	text = text.substr(digitCount(point[0]) + 1, text.length);
 	point[1] = parseInt(text, 10);
 	text = text.substr(digitCount(point[1]) + 1, text.length);
-	point[2] = parseInt(text, 10);
+	let height = parseInt(text, 10);
+	point[2] = height;
+	point[3] = { radius: height }; // adds temporary radius before computing radius according to closest neighbours
 	if (
 		point[0] > mapData.size_max ||
 		point[1] > mapData.size_max ||
