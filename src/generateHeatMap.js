@@ -37,6 +37,8 @@ function mark_terrain(index, mapData, heat_map) {
 	let sqrRadius = Math.pow(radius, 2);
 	let factor = mapData.points[index][3].factor;
 
+	console.log('factor : ', factor);
+
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {
 			let sqrDstFromCenter = Math.pow(offsetX, 2) + Math.pow(offsetY, 2);

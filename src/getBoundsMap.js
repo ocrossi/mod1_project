@@ -19,10 +19,12 @@ function mapCoords_to_worldCoords(mapData, bounds) {
 		mapData.points[i][0] -= bounds.xmin;
 		mapData.points[i][1] -= bounds.ymin;
 	}
-	console.log(mapData.points);
+	console.log('dans wold coords ');
+	print(mapData.points);
 }
 
 function compute_bounds(mapData) {
+	console.log(mapData.points)
 	let bounds = {};
 	setBounds(bounds, mapData, 0);
 	//console.log('bounds', bounds);
@@ -31,6 +33,7 @@ function compute_bounds(mapData) {
 	}
 	mapData.size_map = Math.max(bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin);
 	mapCoords_to_worldCoords(mapData, bounds);
+
 }
 
 
