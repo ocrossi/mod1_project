@@ -7,14 +7,15 @@ function compute_height(coords, radius, nfactor, mapData) {
 	let height = (Math.pow(radius, 2) -
 			(Math.pow(coords.x_comp - coords.x_ref, 2) +
 				Math.pow(coords.y_comp - coords.y_ref, 2))) *  nfactor;
-
+/* le pb vient de la
 	if (mapData.square_flattening === true)
 		height = utils.square_flattening(height, coords, mapData); 
 	if (mapData.sigmoid_flattening === true)
 		height = utils.sigmoid_flattening(height, coords, mapData); 
-
+*/
 	return height;
 }
+
 function store_data(i, closest, mapData) {
 	let radius_min = closest[i][0].radius;
 	let factor = closest[i][0].factor;
@@ -33,25 +34,34 @@ function store_data(i, closest, mapData) {
 function decrease_radius(coords, ctab, mapData) {
 	let i = 1;
 	let z_current_hill = mapData.points[coords.i_ref][2];
-	let radius = z_current_hill;
+	//let radius = z_current_hill;
+	let radius = mapData.points[coords.i_ref][2];
 	let factor = 0;
 
+	console.log('gimme coords');
+	console.log(coords);
+
 	while (radius > 1) {
+		if (coords.i_ref === 0) {
+			console.log('wsh');
+			console.log('rad', radius);
+			console.log('z cur', z_current_hill);
+			console.log('factor', factor);
+		}
 		radius--;
 		if (z_current_hill < Math.pow(radius, 2))
 			i++;
 		factor = (radius + i) / Math.pow(radius, 2);
-		//console.log('factor : ', factor);
 		let c_height = compute_height(coords, radius, factor, mapData);
-		//console.log('c_height : ', c_height);
 		if (c_height < coords.max_height) break;
 	}
-	if (radius === 1) factor = 1;
 	if (factor > 1) {
 		console.log('whyyyy');
 		console.log(radius);
 		console.log(factor);
 	}
+	//if (radius === 1) factor = 1;
+
 
 	ctab[coords.i_ref][coords.j_ref].radius = radius;
 	ctab[coords.i_ref][coords.j_ref].factor = factor;
@@ -61,12 +71,7 @@ function increase_radius(radius, coords, ctab, mapData) {
 	let bound = utils.check_bounds(coords.i_ref, mapData);
 	let z_current_hill = mapData.points[coords.i_ref][2];
 	let factor = z_current_hill / Math.pow(radius, 2);
-/*	
-	console.log('beginning of increase_radius fac : ', factor);
-	console.log('beginning of increase_radius rad : ', radius);
-	console.log('beginning of increase_radius z_c : ', z_current_hill);
-	console.log('beginning of increase_radius bounds : ', bound);
-*/	
+
 	while (radius < bound - 1) {
 		radius++;
 	}
@@ -89,6 +94,7 @@ function compute_radius(i, j, idx_cmp, closest_tab, mapData) {
 		max_height: mapData.points[idx_cmp][2] - 1,
 	};
 	let height = compute_height(coords, radius, nfactor, mapData);
+	console.log('dans compute radius height %d vs max_height %d', height, coords.max_height);
 	if (height > coords.max_height) {
 		decrease_radius(coords, closest_tab, mapData);
 	}
@@ -108,7 +114,7 @@ function compute_all_radius(closest_tab, mapData) {
 }
 
 function create_map_dimensions(mapData) {
-	console.log(mapData.points)
+	console.log(mapData.points);
 	utils.sort_input_tab(mapData);
 	if (mapData.points.length === 1) {
 		mapData.size_map = mapData.points[0][2] * 2; // a revoir
@@ -120,7 +126,6 @@ function create_map_dimensions(mapData) {
 	let closest = sort_closest_points(mapData);
 	compute_all_radius(closest, mapData);
 	compute_bounds(mapData); // recomputes map boundaries with updated radius
-
 }
 
 export default create_map_dimensions;

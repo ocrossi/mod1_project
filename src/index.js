@@ -15,7 +15,7 @@ const { FieldDataTypes } = vtkDataSet;
 import controlPanel from "./controlPanel.html";
 //import inputFile from "raw-loader!../resources/demobounds.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
-import inputFile from "raw-loader!../resources/demo2.mod1";
+import inputFile from "raw-loader!../resources/demo5.mod1";
 
 /* refonte du main */
 import create_map_dimensions from "./createMapDimensions.js";
@@ -86,8 +86,8 @@ let mapData = {
 	unit_length: 1, // voxel length compared to coordinates system
 	res_flag: false,
 	combine_heats: false,
-	square_flattening: true,
-	sigmoid_flattening: false,
+	square_flattening: false,
+	sigmoid_flattening: true,
 };
 
 function main() {
