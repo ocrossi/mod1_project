@@ -25,15 +25,12 @@ function compute_bounds(mapData) {
 	//console.log(mapData.points)
 	let bounds = {};
 	setBounds(bounds, mapData, 0);
-	//console.log('bounds', bounds);
 	for (let i = 1; i < mapData.points.length; i++) {
 		update_bounds(bounds, mapData, i);
 	}
 	mapData.size_map = Math.max(bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin);
 	mapCoords_to_worldCoords(mapData, bounds);
-
+	console.log('bounds', bounds);
 }
-
-
 
 export default compute_bounds;

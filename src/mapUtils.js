@@ -2,6 +2,8 @@ export function check_bounds(index, mapData) {
 	let bounds = [
 		mapData.points[index][0],
 		mapData.points[index][1],
+		mapData.size_map - mapData.points[index][0],
+		mapData.size_map - mapData.points[index][1],
 	];
 	let min = mapData.size_map;
 
@@ -13,7 +15,6 @@ export function check_bounds(index, mapData) {
 
 export function square_flattening(height, coords, mapData) {
 	if (mapData.points[coords.i_ref][2] === 0) return 0;
-
 	height = height / mapData.points[coords.i_ref][2];
 	height = Math.pow(height, 2);
 	height *= mapData.points[coords.i_ref][2];

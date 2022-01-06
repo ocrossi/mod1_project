@@ -1,4 +1,5 @@
 import vtkTriangle from "@kitware/vtk.js/Common/DataModel/Triangle";
+import compute_bounds from "./getBoundsMap";
 
 function compute_normal(tab, polyData) {
 	let points = polyData.getPoints().getData();
@@ -56,9 +57,25 @@ function change_resolution(mapData) {
 	mapData.unit_length = mapData.res_offset;
 }
 
+function change_res2(mapData) {
+	let div = 2;
+
+	console.log('debut res size map : ', mapData.size_map);
+	while (mapData.size_map / div > mapData.resolution_max)
+		div++;
+
+	while (mapData.size_map % div !== 0)
+		mapData.size_map++;
+	console.log('change res2 div: ', div);
+	console.log('fin res size map : ', mapData.size_map);
+
+	mapData.res_offset = div;
+}
 
 // sets data height to display map
 function generate_map(mapData, polyData) {
+	change_res2(mapData);
+	//compute_bounds(mapData);
 	if (mapData.size_map > mapData.resolution_max && mapData.res_flag === true) {
 		change_resolution(mapData);
 	}

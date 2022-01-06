@@ -1,4 +1,4 @@
-;import "@kitware/vtk.js/Rendering/Profiles/Geometry";
+; import "@kitware/vtk.js/Rendering/Profiles/Geometry";
 import "@kitware/vtk.js/macro.js";
 
 import vtkFullScreenRenderWindow from "@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow";
@@ -15,7 +15,7 @@ const { FieldDataTypes } = vtkDataSet;
 import controlPanel from "./controlPanel.html";
 //import inputFile from "raw-loader!../resources/demobounds.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
-import inputFile from "raw-loader!../resources/demo5.mod1";
+import inputFile from "raw-loader!../resources/demo2.mod1";
 
 /* refonte du main */
 import create_map_dimensions from "./createMapDimensions.js";
@@ -48,7 +48,7 @@ const polyData = vtkPolyData.newInstance();
 var waterPolyData = vtkPolyData.newInstance();
 
 
-let	fluidData = {
+let fluidData = {
 	fluid_array: [],
 	map_topo: [],
 	anim_time: 0,
@@ -61,14 +61,14 @@ let fluidCube = {
 	diffusion: 0,
 	viscosity: 0,
 	density: 0,
-	
+
 	temp: new Array(),
-	vX:new Array(),
-	vY:new Array(),
-	vZ:new Array(),
-	vX0:new Array(),
-	vY0:new Array(),
-	vZ0:new Array(),
+	vX: new Array(),
+	vY: new Array(),
+	vZ: new Array(),
+	vX0: new Array(),
+	vY0: new Array(),
+	vZ0: new Array(),
 };
 
 let mapData = {
@@ -86,7 +86,7 @@ let mapData = {
 	unit_length: 1, // voxel length compared to coordinates system
 	res_flag: false,
 	combine_heats: false,
-	square_flattening: false,
+	square_flattening: true,
 	sigmoid_flattening: true,
 };
 
@@ -103,7 +103,7 @@ function main() {
 	//compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
-//	generate_water_grid(mapData, fluidData);
+	//generate_water_grid(mapData, fluidData);
 }
 
 main();
@@ -117,7 +117,7 @@ fullScreenRenderer.addController(controlPanel);
 
 function read_input() {
 	const reader = new FileReader();
-	reader.onload = function () {
+	reader.onload = function() {
 		console.log(reader.result);
 	};
 	reader.readAsText(input.files[0]);
@@ -214,7 +214,7 @@ waterMapper.setInputConnection(waterFilter.getOutputPort());
 
 // add objects to scene, move camera and render
 renderer.addActor(mapActor);
-renderer.addActor(outlineActor);
+renderer.addActor(outlineActor)
 //renderer.addActor(waterActor);
 renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
