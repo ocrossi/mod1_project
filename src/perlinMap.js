@@ -1,17 +1,15 @@
 import SimplexNoise from 'simplex-noise';
+import { store_heat } from "./mapUtils";
 
-function perlin_map(mapData) {
-	let x = 10;
-	let y = 4;
-	let z = 12;
-	let w = 8;
-	const simplex = new SimplexNoise(),
-    value2d = simplex.noise2D(x, y),
-    value3d = simplex.noise3D(x, y, z),
-    value4d = simplex.noise4D(x, y, z, w);
-		console.log("2d", value2d);
-		console.log("3d", value3d);
-		console.log("4d", value4d);
+export function add_noise_heights(heat_map, mapData) {
+	let simplex = new SimplexNoise();
+	for (let i = 0; i <= mapData.size_world; i++) {
+		for (let j = 0; j <= mapData.size_world; j++) {
+			let nx = i / mapData.size_world - 0.5;
+			let ny = j / mapData.size_world - 0.5;
+			let scaler = mapData.highest / 2;	
+			let height = (simplex.noise2D(nx, ny) + 1) * scaler;
+			store_heat(i, j, -2, height, heat_map);
+		}
+	}
 }
-
-export default perlin_map;

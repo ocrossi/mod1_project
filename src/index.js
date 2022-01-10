@@ -12,17 +12,23 @@ import vtkDataSet from "@kitware/vtk.js/Common/DataModel/DataSet";
 const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
+
+import * as ui from "./UI.js"
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo4.mod1";
+//import inputFile from "raw-loader!../resources/demosize.mod1";
+import inputFile from "raw-loader!../resources/demo2.mod1";
+//import inputFile from "raw-loader!../resources/testnotrailingchar.mod1"; // a retest
+//import inputFile from "raw-loader!../resources/demo4.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
 //import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
+//import inputFile from "raw-loader!../resources/demotestfinest.mod1";
 
 import parse_input from "./parsing.js";
-import set_size_map from "./setMap.js";
-import compute_hills_size from './computeHillsSize.js'
-import generate_heat_map from './generateHeatMap.js';
-import generate_map from "./generateScaleMap.js";
-import perlin_map from "./perlinMap.js";
+import change_map_dimensions from "./changeMapDimensions.js";
+import create_map from "./createMap.js";
+import generate_heat_map2 from './generateHeatMap2.js';
+import generate_map2 from "./generateScaleMap2.js";
+// import perlin_map from "./perlinMap.js";
 import generate_water_grid from "./generateStillWater.js";
 import { display_water } from "./fluidUtilities";
 
@@ -40,7 +46,7 @@ const renderWindow = fullScreenRenderer.getRenderWindow();
 // The main for map generation and water movement starts here
 // ----------------------------------------------------------------------------
 
-const polyData = vtkPolyData.newInstance();
+let polyData = vtkPolyData.newInstance();
 var waterPolyData = vtkPolyData.newInstance();
 
 
@@ -69,38 +75,38 @@ let fluidCube = {
 
 let mapData = {
 	size_map: 0,
+	size_world: 0,
+	highest: 0,
 	res_offset: 1,
-	resolution_max: 199,
-	bounds_multiplier: 1,
+	resolution_max: 200,
 	max_height: 0,
-	size_multiplier: 1,
 	size_max: 1000000,
 	points: new Array(),
 	closest_points: new Array(), // no need to define here, memory mismanagment
 	heat_map: new Array(), // no need
 	input: "", // only for parsing, could be destroyed afterwards
-	unit_length: 1, // voxel length compared to coordinates system
-	res_flag: true,
-	combine_heats: true
+	file_name: "",
+	noise_map: false,
+	combine_heats: false,
+	square_flattening: false,
+	sigmoid_flattening: false,
+	reset_map: false
 };
 
 function main() {
 	mapData.input = inputFile;
-
 	if (parse_input(mapData) === false) {
-		console.error("input parsing failure");
+		console.error("input parsing failure"); // faire affichage fail parser a l ecran
 		return;
 	}
-	set_size_map(mapData);
-	compute_hills_size(mapData);
-	generate_heat_map(mapData);
-	generate_map(mapData, polyData);
-	generate_water_grid(mapData, fluidData);
+	create_map(mapData); // creates smallest map possible 
+	change_map_dimensions(mapData); // adds margin and sets a resolution param for big maps
+	generate_heat_map2(mapData);
+	generate_map2(mapData, polyData);
+	//generate_water_grid(mapData, fluidData);
 }
 
 main();
-
-
 
 // -----------------------------------------------------------
 // UI control handling
@@ -111,21 +117,40 @@ fullScreenRenderer.addController(controlPanel);
 function read_input() {
 	const reader = new FileReader();
 	reader.onload = function () {
-		console.log(reader.result);
+		mapData.input = reader.result;
 	};
 	reader.readAsText(input.files[0]);
+	mapData.file_name = input.files[0].name;
+	mapData.reset_map = true;
 }
 
 const input = document.querySelector('input[type="file"]');
 input.addEventListener(
 	"change",
 	(e) => {
-		console.log(input.files);
+		//mapData.file_name = input.files[0].name;
 		read_input();
 	},
 	false
 );
 
+document.querySelector('#generate').addEventListener('click', () => {
+	polyData = vtkPolyData.newInstance();
+	if (mapData.reset_map === true)
+		ui.set_map_input(mapData);
+	ui.toggle_square_f(mapData);
+	ui.toggle_sigmoid(mapData);
+	ui.toggle_heats(mapData);
+	ui.toggle_noise(mapData);
+	ui.change_res(mapData);
+	ui.generate_new_map(polyData, mapData);
+	simpleFilter.setInputData(polyData);
+	outlineFilter.setInputData(polyData);
+	outlineMapper.setInputConnection(outlineFilter.getOutputPort());
+	mapMapper.setInputConnection(simpleFilter.getOutputPort());
+	renderer.resetCamera();
+	renderWindow.render();
+});
 // ----------------------------------------------------------------------------
 // Display output
 // ----------------------------------------------------------------------------

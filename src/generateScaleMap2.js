@@ -48,18 +48,18 @@ function store_normals(normal_index, poly_index, polyData, mapData) {
 }
 
 function change_resolution(mapData) {
-	mapData.res_offset = mapData.size_map / mapData.resolution_max;
+	mapData.res_offset = mapData.size_world / mapData.resolution_max;
 	while (mapData.res_offset % 1 !== 0) {
 		mapData.resolution_max--;
-		mapData.res_offset = mapData.size_map / mapData.resolution_max;
+		mapData.res_offset = mapData.size_world / mapData.resolution_max;
 	}
 }
 
 
 // sets data height to display map
-function generate_map(mapData, polyData) {
-	let nbPoints = (mapData.size_map + 1) * (mapData.size_map + 1);
-	let numPlanes = (mapData.size_map * mapData.size_map) / mapData.res_offset;
+function generate_map2(mapData, polyData) {
+	let nbPoints = (mapData.size_world + 1) * (mapData.size_world + 1);
+	let numPlanes = (mapData.size_world * mapData.size_world);
 
 	let points = new Float64Array(nbPoints * 3);
 	polyData.getPoints().setData(points, 3);
@@ -67,19 +67,16 @@ function generate_map(mapData, polyData) {
 	let polys = new Uint32Array(5 * numPlanes);
 	polyData.getPolys().setData(polys, 1);
 
-	if (mapData.size_map > mapData.resolution_max && mapData.res_flag === true) {
-		change_resolution(mapData);
-	}
 	mapData.normals = new Array(numPlanes * 2); // 1 plane composed of 2 triangles
 	let idx = 0;
 	let z_index = 2;
 	// sets heights using heat map
-	for (let i = 0; i <= mapData.size_map; i++) {
-		for (let j = 0; j <= mapData.size_map; j++) {
+	for (let i = 0; i <= mapData.size_world; i++) {
+		for (let j = 0; j <= mapData.size_world; j++) {
 			points[idx * 3] = i;
 			points[idx * 3 + 1] = j;
 		//	points[idx * 3 + 2] = 0; // z coords
-			points[z_index] = mapData.heat_map[i][j][0].z;
+			points[z_index] = mapData.height_map[i][j];
 			z_index += 3;
 			idx++;
 		}
@@ -87,13 +84,13 @@ function generate_map(mapData, polyData) {
 	idx = 0;
 	let normal_idx = 0;
 	// links points into rectangles
-	for (let k = 0; k < mapData.size_map; k += mapData.res_offset) {
-		for (let l = 0; l < mapData.size_map; l +=mapData.res_offset) {
+	for (let k = 0; k < mapData.size_world; k++) {
+		for (let l = 0; l < mapData.size_world; l++) {
 			polys[idx * 5] = 4;
-			polys[idx * 5 + 1] = k * (mapData.size_map + 1) + l; // ref
-			polys[idx * 5 + 2] =  k * (mapData.size_map + 1) + l + mapData.res_offset; // right
-			polys[idx * 5 + 3] = polys[idx * 5 + 2] + ((mapData.size_map + 1) * mapData.res_offset); // right bottom
-			polys[idx * 5 + 4] = polys[idx * 5 + 1] + ((mapData.size_map + 1) * mapData.res_offset); // down
+			polys[idx * 5 + 1] = k * (mapData.size_world + 1) + l; // ref
+			polys[idx * 5 + 2] =  k * (mapData.size_world + 1) + l + 1; // right
+			polys[idx * 5 + 3] = polys[idx * 5 + 2] + ((mapData.size_world + 1) * 1); // right bottom
+			polys[idx * 5 + 4] = polys[idx * 5 + 1] + ((mapData.size_world + 1) * 1); // down
 			store_normals(normal_idx, idx * 5 + 1, polyData, mapData);
 			normal_idx+=2;
 			idx++;
@@ -101,4 +98,4 @@ function generate_map(mapData, polyData) {
 	}
 }
 
-export default generate_map;
+export default generate_map2;

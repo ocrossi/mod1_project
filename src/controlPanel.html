@@ -1,3 +1,34 @@
-<div>
-	<input type="file" id="input"/>
-</div>
+<input type="file" name="uploadfile" id="img" style="display:none;"/>
+<button><label for="img">Choose map</label></button>
+<br />
+<br />
+  <div>Map resolution</div>
+  <input
+    title="Map res"
+    id="resolution"
+    type="range"
+    min="50"
+    max="500"
+    step="10"
+    value="200"
+  />
+
+<br>
+  <div>Filter 1
+    <input id="square_f" type="checkbox" />
+    <br />
+  </div>
+	<div>Filter 2
+    <input id="sigmo_f" type="checkbox" />
+    <br />
+  </div>
+	<div>Combine heats
+    <input id="comb_heat" type="checkbox" />
+    <br />
+  </div>
+	<div>Add noise map
+    <input id="add_noise" type="checkbox" />
+    <br />
+  </div>
+<br>
+<button id="generate">Generate Map</button>

@@ -24,21 +24,55 @@ function store_point(text, mapData) {
 	return true;
 }
 
+//function process_input()
+
+function split_newline(text, charnl) {
+	//let lineTab = text.split("\\n");
+	let lineTab = text.split(charnl);
+	if (lineTab[lineTab.length - 1] === "")
+		lineTab.pop();
+	return lineTab;
+}
+
+function trim_first_input(mapData) {
+	const reg = new RegExp('".*"');
+	const t1 = reg.exec(mapData.input); // takes everything in double quotes cozz for now fixed input
+	const t2 = t1[0].substring(1, t1[0].length - 2); // suppress 1st and last double quote
+	let lineTab = split_newline(t2, "\\n");
+
+	if (lineTab.length < 1) return false;
+	mapData.input = lineTab;
+}
+
+function check_new_input(mapData) {
+	mapData.reset_map = false;
+	mapData.points = [];
+	let lname = mapData.file_name.length;
+	let extension = mapData.file_name.substring(lname - 5, lname);
+
+
+	mapData.input = split_newline(mapData.input, "\n");
+	if (extension.localeCompare(".mod1") !== 0 || mapData.input.length === 0) 
+		return -1;
+	return 1;
+}
+
 // browse input file, divides it into chunks of points, checks points and
 // stores them in global mapData.points variable
 function parse_input(mapData) {
-	const reg1 = new RegExp('".*"');
-	const reg2 = new RegExp("([0-9]+,[0-9]+,[0-9]+)");
+	const reg = new RegExp("([0-9]+,[0-9]+,[0-9]+)");
 
-	const t1 = reg1.exec(mapData.input); // takes everything in double quotes cozz for now fixed input
-	const t2 = t1[0].substr(1, t1[0].length - 2); // suppress 1st and last double quote
+	if (mapData.reset_map === false) {
+		if (trim_first_input(mapData) === -1) return false;
+	}
+	else {
+		if (check_new_input(mapData) === -1) return false;
+	}
 
-	let lineTab = t2.split("\\n");
-	if (lineTab.length <= 1) return false;
-	for (let i = 0; i < lineTab.length - 1; i++) {
-		let pointsTab = lineTab[i].split(" ");
+	for (let i = 0; i < mapData.input.length; i++) {
+		let pointsTab = mapData.input[i].split(" ");
 		for (let j = 0; j < pointsTab.length; j++) {
-			if (pointsTab[j].match(reg2) === null) {
+			if (pointsTab[j].match(reg) === null) {
 				console.log("FAILURE REGEXP");
 				return false;
 			}
