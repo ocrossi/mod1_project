@@ -31,11 +31,11 @@ function sigmoid_flattening(height, index, mapData) {
 }
 
 function mark_terrain(index, mapData) {
-	let radius = mapData.points[index][3];
+	let radius = mapData.points[index][3].radius;
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
 	let sqrRadius = Math.pow(radius, 2);
-	let factor = mapData.points[index][4];
+	let factor = mapData.points[index][3].factor;
 
 	for (let offsetY = -radius; offsetY <= radius; offsetY++) {
 		for (let offsetX = -radius; offsetX <= radius; offsetX++) {

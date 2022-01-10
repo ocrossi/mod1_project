@@ -13,12 +13,14 @@ const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
-import inputFile from "raw-loader!../resources/demo4.mod1";
+//import inputFile from "raw-loader!../resources/demo4.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
 //import inputFile from "raw-loader!../resources/demosimpleaf.mod1";
+import inputFile from "raw-loader!../resources/demotestfinest.mod1";
 
 import parse_input from "./parsing.js";
 import set_size_map from "./setMap.js";
+import create_map from "./createMap.js";
 import compute_hills_size from './computeHillsSize.js'
 import generate_heat_map from './generateHeatMap.js';
 import generate_map from "./generateScaleMap.js";
@@ -91,6 +93,7 @@ function main() {
 		console.error("input parsing failure");
 		return;
 	}
+	create_map(mapData);
 	set_size_map(mapData);
 	compute_hills_size(mapData);
 	generate_heat_map(mapData);
@@ -99,8 +102,6 @@ function main() {
 }
 
 main();
-
-
 
 // -----------------------------------------------------------
 // UI control handling
