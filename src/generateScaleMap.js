@@ -79,7 +79,7 @@ function generate_map(mapData, polyData) {
 			points[idx * 3] = i;
 			points[idx * 3 + 1] = j;
 		//	points[idx * 3 + 2] = 0; // z coords
-			points[z_index] = mapData.heat_map[i][j][0].z;
+			points[z_index] = mapData.height_map[i][j];
 			z_index += 3;
 			idx++;
 		}

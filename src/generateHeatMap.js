@@ -1,15 +1,18 @@
-function store_heat(x, y, index, newHeight, mapData) {
+function store_heat(x, y, index, newHeight, heat_map) {
+
 	let heat = {
 		z: newHeight,
 		index_origin: index,
 		no_height: 0,
 	};
-	if (mapData.heat_map[x][y][0].no_height === 1)
-		mapData.heat_map[x][y][0] = heat;
+	//console.log('x : %d, y : %d', x, y);
+	//console.log('pt concercerne : ', mapData.points[index]);
+	if (heat_map[x][y][0].no_height === 1)
+		heat_map[x][y][0] = heat;
 	else {
-		if (mapData.heat_map[x][y][0].z < heat.z)
-			mapData.heat_map[x][y].unshift(heat);
-		else mapData.heat_map[x][y].push(heat);
+		if (heat_map[x][y][0].z < heat.z)
+			heat_map[x][y].unshift(heat);
+		else heat_map[x][y].push(heat);
 	}
 }
 
@@ -30,7 +33,7 @@ function sigmoid_flattening(height, index, mapData) {
 	return height;
 }
 
-function mark_terrain(index, mapData) {
+function mark_terrain(index, heat_map, mapData) {
 	let radius = mapData.points[index][3].radius;
 	let centreX = mapData.points[index][0];
 	let centreY = mapData.points[index][1];
@@ -48,57 +51,72 @@ function mark_terrain(index, mapData) {
 					Math.pow(radius, 2) -
 					(Math.pow(brushX - centreX, 2) + Math.pow(brushY - centreY, 2));
 				newHeight *= factor;
-				newHeight = square_flattening(newHeight, index, mapData);
-				newHeight = sigmoid_flattening(newHeight, index, mapData);
-				store_heat(brushX, brushY, index, newHeight, mapData);
+				if (mapData.square_flattening === true)
+					newHeight = square_flattening(newHeight, index, mapData);
+				if (mapData.sigmoid_flattening === true)
+					newHeight = sigmoid_flattening(newHeight, index, mapData);
+				store_heat(brushX, brushY, index, newHeight, heat_map);
 			}
 		}
 	}
 }
 
-
 // adds height to overlapping hills 
-function combine_heats(mapData) {
+function combine_heats(heat_map, mapData) {
 	for (let i = 0; i < mapData.size_map; i++) {
 		for (let j = 0; j < mapData.size_map; j++) {
-			if (mapData.heat_map[i][j].length > 1) {
-				let index = mapData.heat_map[i][j][0].index_origin;
-				for (let k = 1; k < mapData.heat_map[i][j].length; k++) {
-					mapData.heat_map[i][j][0].z += mapData.heat_map[i][j][k].z;
-					mapData.heat_map[i][j][0].z =
-						mapData.heat_map[i][j][0].z > mapData.points[index][2]
+			if (heat_map[i][j].length > 1) {
+				let index = heat_map[i][j][0].index_origin;
+				for (let k = 1; k < heat_map[i][j].length; k++) {
+					heat_map[i][j][0].z += heat_map[i][j][k].z;
+					heat_map[i][j][0].z =
+						heat_map[i][j][0].z > mapData.points[index][2]
 							? mapData.points[index][2]
-							: mapData.heat_map[i][j][0].z;
+							: heat_map[i][j][0].z;
 				}
 			}
 		}
 	}
 }
 
+function store_results(mapData, heat_map) {
+	mapData.height_map = new Array(mapData.size_map + 1);
+
+	for (let i = 0; i <= mapData.size_map; i++) {
+		mapData.height_map[i] = new Array(mapData.size_map + 1);
+		for (let j = 0; j <= mapData.size_map; j++) {
+			mapData.height_map[i][j] = heat_map[i][j][0].z;
+		}
+	}
+}
+
 // compute each hill height to combine overlap results
 function generate_heat_map(mapData) {
-	mapData.heat_map = new Array(mapData.size_map + 1);
+	let heat_map = new Array(mapData.size_map + 1);
+
+	console.log('in heat map size map : ', mapData.size_map);
 
 	// allocate a tab for each pair of x,y coords on the map
 	for (let i = 0; i <= mapData.size_map; i++) {
-		mapData.heat_map[i] = new Array(mapData.size_map + 1);
+		heat_map[i] = new Array(mapData.size_map + 1);
 		for (let j = 0; j <= mapData.size_map; j++) {
-			mapData.heat_map[i][j] = new Array();
-			mapData.heat_map[i][j][0] = { z: 0, no_height: 1 };
+			heat_map[i][j] = new Array();
+			heat_map[i][j][0] = { z: 0, no_height: 1 };
 		}
 	}
 	for (let i = 0; i < mapData.points.length; i++) {
 		// sets input points
-		mapData.heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
+		heat_map[mapData.points[i][0]][mapData.points[i][1]][0] = {
 			z: mapData.points[i][2],
 			index_origin: i,
 			no_height: 0,
 		};
 		// marks heights of hills for each point
-		mark_terrain(i, mapData);
+		mark_terrain(i, heat_map, mapData);
 	}
 	if (mapData.combine_heats === true)
-		combine_heats(mapData);
+		combine_heats(heat_map, mapData);
+	store_results(mapData, heat_map);
 }
 
 export default generate_heat_map;

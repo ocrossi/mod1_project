@@ -2,6 +2,7 @@ import sort_closest_points from "./sortClosestPoint2.js";
 import manage_one_point_map from "./onePointMap.js";
 import compute_radius_using_neighbors from "./radiusWithNeighbors.js";
 import update_bounds from "./updateBounds.js"
+import resize_map from './resizeMap.js';
 
 function compute_radius_simple(i, j, closest_tab, mapData) {
 	closest_tab[i][j].radius = mapData.points[i][2];
@@ -27,7 +28,7 @@ function get_map_bounds(closest_tab, max) {
 	let gbounds = [-max, -max, 2 * max, 2 * max];
 
 	for (let i = 0; i < closest_tab.length; i++) {
-		let cbounds = [-max, -max, 2 * max, 2 * max];	
+		let cbounds = [-max, -max, 2 * max, 2 * max];
 		for (let j = 0; j < closest_tab[0].length; j++) {
 			cbounds[0] = Math.max(closest_tab[i][j].x_min, cbounds[0]);
 			cbounds[1] = Math.max(closest_tab[i][j].y_min, cbounds[1]);
@@ -44,8 +45,8 @@ function get_map_bounds(closest_tab, max) {
 
 function compute_simple_bounds(closest_tab, mapData) {
 	for (let i = 0; i < closest_tab.length; i++) {
-		for (let j = 0; j < closest_tab[0].length; j++) 
-			compute_radius_simple(i, j,  closest_tab, mapData);
+		for (let j = 0; j < closest_tab[0].length; j++)
+			compute_radius_simple(i, j, closest_tab, mapData);
 	}
 	set_hill_limits(closest_tab, mapData.size_max);
 	return get_map_bounds(closest_tab, mapData.size_max);
@@ -54,26 +55,16 @@ function compute_simple_bounds(closest_tab, mapData) {
 function stock_radius(closest_tab, mapData) {
 	let temp = 0;
 
-	/* a virer c juste pr test */ 
-	let tmpret = new Array(mapData.points.length);
-	/* */
-
-  for (let i = 0; i < mapData.points.length; i++) {
-	let radius = mapData.size_max;
-		console.log('[1]');
+	for (let i = 0; i < mapData.points.length; i++) {
+		let radius = mapData.size_max;
 		for (let j = 0; j < closest_tab[0].length; j++) {
-		console.log('[2]');
 			if (closest_tab[i][j].radius < radius) {
 				j = temp;
 				radius = closest_tab[i][j].radius;
 			}
 		}
-		mapData.points[i][3] = { radius: closest_tab[i][temp].radius , factor: closest_tab[i][temp].factor };
-		tmpret[i] = {radius: closest_tab[i][temp].radius , factor: closest_tab[i][temp].factor};
+		mapData.points[i][3] = { radius: closest_tab[i][temp].radius, factor: closest_tab[i][temp].factor };
 	}
-	
-	console.log('end of stock radius : ', tmpret);
-	return tmpret;
 }
 
 function translate_map(mapData) {
@@ -106,20 +97,13 @@ function create_map(mapData) {
 	let closest_tab = sort_closest_points(mapData);
 
 	mapData.bounds = compute_simple_bounds(closest_tab, mapData);
-	console.log('end of compute simple bounds : ', mapData.bounds);
-
 	compute_radius_using_neighbors(closest_tab, mapData);
 	stock_radius(closest_tab, mapData);
 	update_bounds(mapData);
 	set_size_map(mapData);
-	
-	console.log(mapData.points);
-	translate_map(mapData);
-	//console.log('sort closest points le tab');
-	//console.log(closest_tab);
+	translate_map(mapData); // moves points into whole natural numbers system
 
-	//mapCoords_to_worldCoords(mapData);
-	//resize_map(mapData);
+//	resize_map(mapData);
 }
 
 export default create_map;

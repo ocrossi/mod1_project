@@ -27,11 +27,12 @@ function update_bounds(mapData) {
 		mapData.points[0][0] + mapData.points[0][3].radius,
 		mapData.points[0][1] + mapData.points[0][3].radius,
 	];
-	for (let i = 1; i < mapData.length; i++) {
+	for (let i = 1; i < mapData.points.length; i++) {
 		bounds[0] = Math.min(bounds[0], mapData.points[i][0] - mapData.points[i][3].radius);
 		bounds[1] = Math.min(bounds[1], mapData.points[i][1] - mapData.points[i][3].radius);
 		bounds[2] = Math.max(bounds[2], mapData.points[i][0] + mapData.points[i][3].radius);
-		bounds[3] = Math.max(bounds[3], mapData.points[i][0] + mapData.points[i][3].radius);
+		bounds[3] = Math.max(bounds[3], mapData.points[i][1] + mapData.points[i][3].radius);
+		console.count(bounds);
 	}
 	mapData.bounds = bounds;
 	return bounds;

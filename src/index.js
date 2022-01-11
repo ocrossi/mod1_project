@@ -82,8 +82,10 @@ let mapData = {
 	heat_map: new Array(), // no need
 	input: "", // only for parsing, could be destroyed afterwards
 	unit_length: 1, // voxel length compared to coordinates system
-	res_flag: true,
-	combine_heats: true
+	res_flag: false,
+	combine_heats: false,
+	square_flattening: true, // pb here
+	sigmoid_flattening: false
 };
 
 function main() {
@@ -94,11 +96,11 @@ function main() {
 		return;
 	}
 	create_map(mapData);
-	set_size_map(mapData);
-	compute_hills_size(mapData);
+//	set_size_map(mapData);
+//	compute_hills_size(mapData);
 	generate_heat_map(mapData);
 	generate_map(mapData, polyData);
-	generate_water_grid(mapData, fluidData);
+	//generate_water_grid(mapData, fluidData);
 }
 
 main();
