@@ -59,6 +59,14 @@ function check_new_input(mapData) {
 
 // browse input file, divides it into chunks of points, checks points and
 // stores them in global mapData.points variable
+
+function all_heights_null(mapData) {
+	for (let i = 0; i < mapData.points.length; i++) {
+		if (mapData.points[i][2] !== 0) return false;
+	}
+	return true;
+}
+
 function parse_input(mapData) {
 	const reg = new RegExp("([0-9]+,[0-9]+,[0-9]+)");
 
@@ -79,6 +87,7 @@ function parse_input(mapData) {
 			if (store_point(pointsTab[j], mapData) === false) return false;
 		}
 	}
+	if (all_heights_null(mapData) === true) return false;
 	return true;
 }
 

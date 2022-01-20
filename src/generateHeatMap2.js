@@ -68,6 +68,7 @@ function generate_heat_map2(mapData) {
 	mapData.highest /= mapData.res_offset;
 	let heat_map = new Array(mapData.size_world + 1);
 
+
 	// allocate a tab for each pair of x,y coords on the map
 	for (let i = 0; i <= mapData.size_world; i++) {
 		heat_map[i] = new Array(mapData.size_world + 1);

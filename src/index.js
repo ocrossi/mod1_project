@@ -16,7 +16,7 @@ const { FieldDataTypes } = vtkDataSet;
 import * as ui from "./UI.js"
 import controlPanel from "./controlPanel.html";
 //import inputFile from "raw-loader!../resources/demosize.mod1";
-import inputFile from "raw-loader!../resources/demo2.mod1";
+import inputFile from "raw-loader!../resources/demo1.mod1";
 //import inputFile from "raw-loader!../resources/testnotrailingchar.mod1"; // a retest
 //import inputFile from "raw-loader!../resources/demo4.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
@@ -155,13 +155,15 @@ document.querySelector('#generate').addEventListener('click', () => {
 // Display output
 // ----------------------------------------------------------------------------
 
+
 // sets colors to height map
 function map_color(x) {
-	if (x[2] < 1)
+	let hmax = mapData.highest;
+	if (x[2] < hmax / 8)
 		return 0;
-	if (x[2] < 10)
+	if (x[2] < hmax / 4)
 		return 1;
-	if (x[2] < 20)
+	if (x[2] < 3 * hmax / 4)
 		return 2;
 	return 3;
 }

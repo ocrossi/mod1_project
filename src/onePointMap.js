@@ -6,6 +6,7 @@ function one_point_map(mapData) {
 	mapData.size_map = 2 * mapData.points[0][2];
 	mapData.points[0][0] = mapData.points[0][2];
 	mapData.points[0][1] = mapData.points[0][2];
+	mapData.highest = mapData.points[0][2];
 }
 
 export default one_point_map;

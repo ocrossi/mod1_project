@@ -9,13 +9,11 @@ export function set_map_input(mapData) {
 	if (parse_input(mapData) === false) {
 		console.error("input parsing failure"); // faire affichage fail parser a l ecran
 	}
-	/*
 	mapData.size_map = 0;
 	mapData.size_world = 0;
 	mapData.highest = 0;
 	mapData.res_offset = 1;
 	mapData.max_height = 0;
-	*/
 }
 
 export function change_res(mapData) {
