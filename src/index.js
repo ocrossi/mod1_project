@@ -30,8 +30,8 @@ import generate_heat_map2 from './generateHeatMap2.js';
 import generate_map2 from "./generateScaleMap2.js";
 // import perlin_map from "./perlinMap.js";
 import generate_water_grid from "./generateStillWater.js";
-import { display_water } from "./fluidUtilities";
-
+import { display_water_sphere } from "./fluidUtilities";
+import update_water from './updateWater.js'
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
 
 // ----------------------------------------------------------------------------
@@ -103,6 +103,8 @@ function main() {
 	change_map_dimensions(mapData); // adds margin and sets a resolution param for big maps
 	generate_heat_map2(mapData);
 	generate_map2(mapData, polyData);
+
+
 	//generate_water_grid(mapData, fluidData);
 }
 
@@ -216,7 +218,11 @@ outlineActor.setMapper(outlineMapper);
 const waterActor = vtkActor.newInstance();
 const waterMapper = vtkMapper.newInstance();
 
+let droplet =	display_water_sphere(fluidData, waterPolyData);
+//waterMapper.setInputConnection(droplet.getOutputPort());
+
 waterActor.setMapper(waterMapper);
+
 const waterFilter = vtkCalculator.newInstance();
 
 waterFilter.setFormulaSimple(
@@ -227,8 +233,9 @@ waterFilter.setFormulaSimple(
 	(x) => 4
 ); // Our formula for z
 
-waterFilter.setInputData(waterPolyData);
+waterFilter.setInputConnection(droplet.getOutputPort());
 waterMapper.setInputConnection(waterFilter.getOutputPort());
+
 // ! water ! //
 
 
@@ -242,19 +249,22 @@ renderer.resetCamera();
 renderWindow.render();
 //actor.getProperty().setWireframe(true);
 
-/*
+
 var intervalId = window.setInterval(function(){
 	waterPolyData = vtkPolyData.newInstance();
 	fluidData.anim_time += 1;
-	console.log("anim_time :", fluidData.anim_time);
-	display_water(fluidData, waterPolyData);
+	//console.log("anim_time :", fluidData.anim_time);
+	update_water(fluidData);
+	let droplet = display_water_sphere(fluidData);
+	//waterMapper.setInputConnection(droplet.getOutputPort());
+	waterActor.setMapper(waterMapper);
 	renderer.addActor(waterActor);
 
-	waterFilter.setInputData(waterPolyData);
+	waterFilter.setInputConnection(droplet.getOutputPort());
 	waterMapper.setInputConnection(waterFilter.getOutputPort());
 	renderWindow.render();
 }, 1000);
-*/
+
 
 global.renderWindow = renderWindow;
 global.fullScreenRenderer = fullScreenRenderer;
