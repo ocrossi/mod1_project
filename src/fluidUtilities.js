@@ -75,7 +75,9 @@ export function display_water_cube(fluidData, waterPolyData) {
 
 export function display_water_sphere(fluidData, waterPolyData) {
 	//return new vtkSphere(0, 0, 10 + fluidData.anim_time);
-	let center = [0, 0, 10 + fluidData.anim_time];
+	let center = [fluidData.fluid_array[0].pos.x, fluidData.fluid_array[0].pos.y, fluidData.fluid_array[0].pos.y];
+	
+
 	let waterDroplet = vtkSphereSource.newInstance();
 	waterDroplet.setCenter(center);
 

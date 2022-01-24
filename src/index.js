@@ -16,7 +16,8 @@ const { FieldDataTypes } = vtkDataSet;
 import * as ui from "./UI.js"
 import controlPanel from "./controlPanel.html";
 //import inputFile from "raw-loader!../resources/demosize.mod1";
-import inputFile from "raw-loader!../resources/demo1.mod1";
+import inputFile from "raw-loader!../resources/demoO.mod1";
+//import inputFile from "raw-loader!../resources/demo1.mod1";
 //import inputFile from "raw-loader!../resources/testnotrailingchar.mod1"; // a retest
 //import inputFile from "raw-loader!../resources/demo4.mod1";
 //import inputFile from "raw-loader!../resources/demolimittesting.mod1";
@@ -28,11 +29,15 @@ import change_map_dimensions from "./changeMapDimensions.js";
 import create_map from "./createMap.js";
 import generate_heat_map2 from './generateHeatMap2.js';
 import generate_map2 from "./generateScaleMap2.js";
+import {add_one_droplet} from "./addDroplets.js"
+
 // import perlin_map from "./perlinMap.js";
 import generate_water_grid from "./generateStillWater.js";
 import { display_water_sphere } from "./fluidUtilities";
 import update_water from './updateWater.js'
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
+
+
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -103,6 +108,13 @@ function main() {
 	change_map_dimensions(mapData); // adds margin and sets a resolution param for big maps
 	generate_heat_map2(mapData);
 	generate_map2(mapData, polyData);
+
+	add_one_droplet(fluidData, mapData);
+
+	console.log('after add 1 droplet ');
+	console.log('pos :', fluidData.fluid_array[0].pos);
+	console.log("old_pos :", fluidData.fluid_array[0].old_pos);
+	console.log(fluidData.fluid_array);
 
 
 	//generate_water_grid(mapData, fluidData);
@@ -250,11 +262,13 @@ renderWindow.render();
 //actor.getProperty().setWireframe(true);
 
 
-var intervalId = window.setInterval(function(){
+window.setInterval(function(){
 	waterPolyData = vtkPolyData.newInstance();
 	fluidData.anim_time += 1;
+
 	//console.log("anim_time :", fluidData.anim_time);
-	update_water(fluidData);
+	if (fluidData.anim_time < 10)
+		update_water(fluidData, mapData);
 	let droplet = display_water_sphere(fluidData);
 	//waterMapper.setInputConnection(droplet.getOutputPort());
 	waterActor.setMapper(waterMapper);
