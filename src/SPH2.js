@@ -59,7 +59,7 @@ export class Vector3 {
 	}
 	
 	divide_scalar(scalar) {
-		return new Vector3(scalar * this.x, scalar * this.y, scalar * this.z);
+		return new Vector3(this.x / scalar, this.y / scalar, this.z / scalar);
 	}
 
   set_to(v) {
@@ -94,10 +94,14 @@ export class Vector3 {
 export class Ball {
 	// pos & old_pos class Vector3
 	constructor(pos, old_pos, radius, vel, mass) {
+		console.log(pos);
+		console.log(old_pos);
+		console.log(vel);
 		this.pos = pos;
 		this.old_pos = old_pos;
 		this.radius = radius;
 		this.vel = vel;
 		this.mass = mass;
+		console.log('this is shiet', this);
 	}
 }

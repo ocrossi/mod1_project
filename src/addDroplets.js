@@ -5,11 +5,22 @@ function get_rand11() {
 	return 2 * Math.random() - 1;
 }
 
-export function add_one_droplet(fluiData, mapData) {
-	//let v3 = new Vector3(10, 10, 10); 
-	//let vel = 0;
-	//let mass = 0;
-	//
+function init_particle_pos(mapData) {
+	let pos = new Vector3(Math.round(mapData.size_world /2), Math.round(mapData.size_world /2), 20);
+	let old_pos = new Vector3(pos.x, pos.y, pos.z);
+	let ball = new Ball(pos, old_pos, 1, 0, 10);
+	return (ball);
+}
+
+export function add_n_droplet(fluidData, mapData, n) {
+	for (let i = 0; i < n; i++) {
+		let waterDroplet = init_particle_pos(mapData);
+		console.log('wD', waterDroplet);
+		fluidData.fluid_array.push(waterDroplet);
+	}
+
+	fluidData.droplets.setNumberOfPoints(n);
+	/*
 	let maxr = 0.1;
 	let radius = maxr + maxr * (1 - get_rand11() * get_rand11());
 	radius *= maxr * 2;
@@ -20,8 +31,7 @@ export function add_one_droplet(fluiData, mapData) {
 	let pos = new Vector3(10, 10, mapData.highest); // hardcoded for now, we just wanna test physics with 1 ball
 	let old_pos = new Vector3(pos.x, pos.y, pos.z);
 
-	let waterDroplet = new Ball(pos, old_pos, radius, 0, mass);
-	fluiData.fluid_array.push(waterDroplet);
+	*/
 
-	console.log('dans add_1_d fluidArr : ', fluiData.fluid_array);
+	console.log('dans add_1_d fluidArr : ', fluidData.fluid_array);
 }

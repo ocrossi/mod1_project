@@ -9,6 +9,7 @@ import vtkCalculator from "@kitware/vtk.js/Filters/General/Calculator";
 import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkDataSet from "@kitware/vtk.js/Common/DataModel/DataSet";
+import vtkPointSource from '@kitware/vtk.js/Filters/Sources/PointSource';
 const { ColorMode, ScalarMode } = vtkMapper;
 const { FieldDataTypes } = vtkDataSet;
 
@@ -29,15 +30,15 @@ import change_map_dimensions from "./changeMapDimensions.js";
 import create_map from "./createMap.js";
 import generate_heat_map2 from './generateHeatMap2.js';
 import generate_map2 from "./generateScaleMap2.js";
-import {add_one_droplet} from "./addDroplets.js"
+import * as ap from "./addDroplets.js"
 
 // import perlin_map from "./perlinMap.js";
 import generate_water_grid from "./generateStillWater.js";
-import { display_water_sphere } from "./fluidUtilities";
-import update_water from './updateWater.js'
+import { display_water_particles } from "./fluidUtilities";
+import update_water from './updateWater.js';
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
 
-
+let ANIM_ITER = 4000;
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -59,6 +60,7 @@ let	fluidData = {
 	fluid_array: [],
 	map_topo: [],
 	anim_time: 0,
+	droplets: vtkPointSource.newInstance()
 };
 
 
@@ -109,7 +111,8 @@ function main() {
 	generate_heat_map2(mapData);
 	generate_map2(mapData, polyData);
 
-	add_one_droplet(fluidData, mapData);
+	let n = 1;
+	ap.add_n_droplet(fluidData, mapData, n);
 
 	console.log('after add 1 droplet ');
 	console.log('pos :', fluidData.fluid_array[0].pos);
@@ -227,11 +230,12 @@ outlineActor.setMapper(outlineMapper);
 // ! outline box ! //
 
 // ! water ! //
+//
 const waterActor = vtkActor.newInstance();
 const waterMapper = vtkMapper.newInstance();
 
-let droplet =	display_water_sphere(fluidData, waterPolyData);
-//waterMapper.setInputConnection(droplet.getOutputPort());
+display_water_particles(fluidData, waterPolyData);
+waterMapper.setInputConnection(waterPolyData);
 
 waterActor.setMapper(waterMapper);
 
@@ -245,7 +249,7 @@ waterFilter.setFormulaSimple(
 	(x) => 4
 ); // Our formula for z
 
-waterFilter.setInputConnection(droplet.getOutputPort());
+waterFilter.setInputConnection(fluidData.droplets.getOutputPort());
 waterMapper.setInputConnection(waterFilter.getOutputPort());
 
 // ! water ! //
@@ -266,18 +270,22 @@ window.setInterval(function(){
 	waterPolyData = vtkPolyData.newInstance();
 	fluidData.anim_time += 1;
 
+	if (fluidData.anim_time  === ANIM_ITER / 2){
+		ap.add_n_droplet(fluidData, mapData, 1);
+	}
+
 	//console.log("anim_time :", fluidData.anim_time);
-	if (fluidData.anim_time < 10)
+	if (fluidData.anim_time < ANIM_ITER)
 		update_water(fluidData, mapData);
-	let droplet = display_water_sphere(fluidData);
-	//waterMapper.setInputConnection(droplet.getOutputPort());
+	display_water_particles(fluidData,waterPolyData);
+//	waterMapper.setInputConnection(droplet.getOutputPort());
 	waterActor.setMapper(waterMapper);
 	renderer.addActor(waterActor);
 
-	waterFilter.setInputConnection(droplet.getOutputPort());
+	waterFilter.setInputData(fluidData.droplets.getOutputPort());
 	waterMapper.setInputConnection(waterFilter.getOutputPort());
 	renderWindow.render();
-}, 1000);
+}, 1);
 
 
 global.renderWindow = renderWindow;

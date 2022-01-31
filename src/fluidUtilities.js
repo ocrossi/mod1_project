@@ -1,5 +1,4 @@
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
-import vtkSphereSource from '@kitware/vtk.js/Filters/Sources/SphereSource';
 
 export function display_water_cube(fluidData, waterPolyData) {
 	let nbPoints = 8;
@@ -73,13 +72,27 @@ export function display_water_cube(fluidData, waterPolyData) {
 }
 
 
-export function display_water_sphere(fluidData, waterPolyData) {
+export function display_water_particles(fluidData, waterPolyData) {
 	//return new vtkSphere(0, 0, 10 + fluidData.anim_time);
-	let center = [fluidData.fluid_array[0].pos.x, fluidData.fluid_array[0].pos.y, fluidData.fluid_array[0].pos.y];
-	
+	let points = [];
+	//var waterDroplets = vtkPointSource.newInstance();
+	for (let i = 0; i  < fluidData.fluid_array.length; i++) {
+		//let center = fluidData.droplets.getCenterArray(i);
+		//console.log("i", i);
+		//console.log("center", center);
+		let center = [
+			fluidData.fluid_array[i].pos.x,
+			fluidData.fluid_array[i].pos.y,
+			fluidData.fluid_array[i].pos.z
+		];
+		let temp = points.concat(points, center);
+		points = temp;
+		let radius = fluidData.fluid_array[i].radius;
+		//waterDroplet.setCenter(center);
+		//waterDroplet.setRadius(radius);
+		//waterPolyData.setInputConnection(waterDroplet.getOutputPort());
+	}
+	console.log(points);
 
-	let waterDroplet = vtkSphereSource.newInstance();
-	waterDroplet.setCenter(center);
-
-	return waterDroplet;
+	//return waterDroplet;
 }
