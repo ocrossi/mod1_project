@@ -92,7 +92,51 @@ export function display_water_particles(fluidData, waterPolyData) {
 		//waterDroplet.setRadius(radius);
 		//waterPolyData.setInputConnection(waterDroplet.getOutputPort());
 	}
-	console.log(points);
+	//console.log(points);
 
 	//return waterDroplet;
+}
+
+export function render_water(data, mapper, actor, filter, renderer) {
+	actor.setMapper(mapper);
+	renderer.addActor(actor);
+	filter.setInputConnection(data.getOutputPort());
+	mapper.setInputConnection(filter.getOutputPort());
+}
+
+export function render_water2(data, mapper, actor, filter, renderer) {
+	actor.setMapper(mapper);
+	renderer.addActor(actor);
+	filter.setInputConnection(data.getOutputData());
+	mapper.setInputConnection(filter.getOutputPort());
+}
+
+
+export function render_waters(data, mapper, actor, filter, renderer) {
+
+//	actor.getProperty().setColor(0.0, 0.0, 1.0);
+	//filter.setInputData(data);
+	mapper.setInputData(data);
+	actor.getProperty().setPointSize(1);
+	mapper.setRadius(10);
+	actor.setMapper(mapper);
+	renderer.addActor(actor);
+}
+
+export function display_n_droplets(fluidData, wpd) {
+	let nbParticles = fluidData.fluid_array.length;
+	let points = new Float32Array(nbParticles * 3);
+	const cells = new Uint32Array(nbParticles + 1);
+	
+	for (let i = 0; i < nbParticles; i++) {
+		points[i * 3] = fluidData.fluid_array[i].pos.x;
+		points[i * 3 + 1] = fluidData.fluid_array[i].pos.y;
+		points[i * 3 + 2] = fluidData.fluid_array[i].pos.z;
+		cells[1 + i] = i;
+	}
+	cells[0] = nbParticles;
+	wpd.getPoints().setData(points,  3);
+	wpd.getVerts().setData(cells, 1);
+//	console.log(points);
+//	console.log(cells);
 }

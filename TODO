@@ -13,3 +13,7 @@ ajouter map swap dans UI
 WATER
 generer tableau ints pour representer map en 3D
 test cas d utilisation de memoires sur grosses maps
+
+REFACTO
+fonctions affichage et pipeline vtk
+class sph a simplifier

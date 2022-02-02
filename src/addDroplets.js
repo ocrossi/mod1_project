@@ -5,8 +5,8 @@ function get_rand11() {
 	return 2 * Math.random() - 1;
 }
 
-function init_particle_pos(mapData) {
-	let pos = new Vector3(Math.round(mapData.size_world /2), Math.round(mapData.size_world /2), 20);
+function init_particle_pos(mapData, n) {
+	let pos = new Vector3(Math.round(mapData.size_world / (n + 1)), Math.round(mapData.size_world / (n + 1)), 20);
 	let old_pos = new Vector3(pos.x, pos.y, pos.z);
 	let ball = new Ball(pos, old_pos, 1, 0, 10);
 	return (ball);
@@ -14,7 +14,7 @@ function init_particle_pos(mapData) {
 
 export function add_n_droplet(fluidData, mapData, n) {
 	for (let i = 0; i < n; i++) {
-		let waterDroplet = init_particle_pos(mapData);
+		let waterDroplet = init_particle_pos(mapData, i);
 		console.log('wD', waterDroplet);
 		fluidData.fluid_array.push(waterDroplet);
 	}

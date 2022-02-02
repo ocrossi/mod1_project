@@ -61,7 +61,7 @@ function generate_map2(mapData, polyData) {
 	let nbPoints = (mapData.size_world + 1) * (mapData.size_world + 1);
 	let numPlanes = (mapData.size_world * mapData.size_world);
 
-	let points = new Float64Array(nbPoints * 3);
+	let points = new Float32Array(nbPoints * 3);
 	polyData.getPoints().setData(points, 3);
 
 	let polys = new Uint32Array(5 * numPlanes);

@@ -4,6 +4,7 @@ import "@kitware/vtk.js/macro.js";
 import vtkFullScreenRenderWindow from "@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow";
 import vtkActor from "@kitware/vtk.js/Rendering/Core/Actor";
 import vtkMapper from "@kitware/vtk.js/Rendering/Core/Mapper";
+import vtkSphereMapper from "@kitware/vtk.js/Rendering/Core/SphereMapper";
 import vtkPolyData from "@kitware/vtk.js/Common/DataModel/PolyData.js";
 import vtkCalculator from "@kitware/vtk.js/Filters/General/Calculator";
 import vtkOutlineFilter from "@kitware/vtk.js/Filters/General/OutlineFilter";
@@ -34,11 +35,12 @@ import * as ap from "./addDroplets.js"
 
 // import perlin_map from "./perlinMap.js";
 import generate_water_grid from "./generateStillWater.js";
-import { display_water_particles } from "./fluidUtilities";
+import { display_water_particles,display_n_droplets, render_water, render_waters } from "./fluidUtilities";
 import update_water from './updateWater.js';
 import vtkSphere from '@kitware/vtk.js/Common/DataModel/Sphere';
+import vtkSphereSource from '@kitware/vtk.js/Filters/Sources/SphereSource';
 
-let ANIM_ITER = 4000;
+let ANIM_ITER = 30000;
 
 // ----------------------------------------------------------------------------
 // Standard rendering code setup
@@ -111,14 +113,14 @@ function main() {
 	generate_heat_map2(mapData);
 	generate_map2(mapData, polyData);
 
-	let n = 1;
+	let n = 3;
 	ap.add_n_droplet(fluidData, mapData, n);
 
 	console.log('after add 1 droplet ');
 	console.log('pos :', fluidData.fluid_array[0].pos);
 	console.log("old_pos :", fluidData.fluid_array[0].old_pos);
 	console.log(fluidData.fluid_array);
-
+	display_n_droplets(fluidData, waterPolyData);
 
 	//generate_water_grid(mapData, fluidData);
 }
@@ -172,6 +174,14 @@ document.querySelector('#generate').addEventListener('click', () => {
 // Display output
 // ----------------------------------------------------------------------------
 
+function test_spheres() {
+	let test = vtkSphereSource.newInstance();
+	let coords = [fluidData.fluid_array[0].pos.x, fluidData.fluid_array[0].pos.y, fluidData.fluid_array[0].pos.z];
+//	console.log(coords);
+	test.setCenter(coords);
+	test.setRadius(1);
+	return test;
+}
 
 // sets colors to height map
 function map_color(x) {
@@ -232,33 +242,95 @@ outlineActor.setMapper(outlineMapper);
 // ! water ! //
 //
 const waterActor = vtkActor.newInstance();
+const waterSActor = vtkActor.newInstance();
+const waterSMapper = vtkSphereMapper.newInstance(/*{
+	interpolateScalarsBeforeMapping: true,
+  colorMode: ColorMode.DEFAULT,
+  scalarMode: ScalarMode.DEFAULT,
+  useLookupTableScalarRange: true,
+  lookupTable,
+}*/);
 const waterMapper = vtkMapper.newInstance();
 
-display_water_particles(fluidData, waterPolyData);
-waterMapper.setInputConnection(waterPolyData);
-
-waterActor.setMapper(waterMapper);
+display_n_droplets(fluidData, waterPolyData);
+//waterMapper.setInputData(waterPolyData);
 
 const waterFilter = vtkCalculator.newInstance();
+const waterSFilter = vtkCalculator.newInstance({
+  getArrays: (inputDataSets) => ({
+    input: [{ location: FieldDataTypes.COORDINATE }], // Require point coordinates as input
+    output: [
+      // Generate two output arrays:
+      {
+        location: FieldDataTypes.POINT, // This array will be point-data ...
+        name: 'pressure', // ... with the given name ...
+        dataType: 'Float32Array', // ... of this type ...
+        numberOfComponents: 1, // ... with this many components ...
+      },
+      {
+        location: FieldDataTypes.POINT, // This array will be field data ...
+        name: 'temperature', // ... with the given name ...
+        dataType: 'Float32Array', // ... of this type ...
+        attribute: AttributeTypes.SCALARS, // ... and will be marked as the default scalars.
+        numberOfComponents: 1, // ... with this many components ...
+      },
+    ],
+  }),
+  evaluate: (arraysIn, arraysOut) => {
+    // Convert in the input arrays of vtkDataArrays into variables
+    // referencing the underlying JavaScript typed-data arrays:
+    const [coords] = arraysIn.map((d) => d.getData());
+    const [press, temp] = arraysOut.map((d) => d.getData());
 
+    // Since we are passed coords as a 3-component array,
+    // loop over all the points and compute the point-data output:
+    for (let i = 0, sz = coords.length / 3; i < sz; ++i) {
+      press[i] =
+        ((coords[3 * i] - 0.5) * (coords[3 * i] - 0.5) +
+          (coords[3 * i + 1] - 0.5) * (coords[3 * i + 1] - 0.5) +
+          0.125) *
+        0.1;
+      temp[i] = coords[3 * i + 1];
+    }
+    // Mark the output vtkDataArray as modified
+    arraysOut.forEach((x) => x.modified());
+  },
+}
+);
+
+waterSMapper.setRadius(10);
+waterSActor.getProperty().setPointSize(1);
+let test = test_spheres();
+	//waterFilter.setInputData(waterPolyData);
+
+
+//waterActor.setMapper(waterMapper);
 waterFilter.setFormulaSimple(
 	FieldDataTypes.POINT, // Generate an output array defined over points.
 	[], // We don't request any point-data arrays because point coordinates are made available by default.
 	"z", // Name the output array "z"
 	//(x) => (x[0] - 0.5) * (x[0] - 0.5) + (x[1] - 0.5) * (x[1] - 0.5) + 0.125
-	(x) => 4
+	() => 4
 ); // Our formula for z
+//waterSFilter.
 
-waterFilter.setInputConnection(fluidData.droplets.getOutputPort());
-waterMapper.setInputConnection(waterFilter.getOutputPort());
+//waterFilter.setInputConnection(waterPolyData);
+//waterMapper.setInputConnection(waterPolyData);
 
+//waterFilter.setInputConnection(test.getOutputPort());
+//waterMapper.setInputConnection(waterFilter.getOutputPort());
+
+
+render_water(test, waterMapper, waterActor, waterFilter, renderer);
+render_waters(waterPolyData, waterSMapper, waterSActor, waterSFilter, renderer);
 // ! water ! //
 
 
 // add objects to scene, move camera and render
 renderer.addActor(mapActor);
 renderer.addActor(outlineActor);
-//renderer.addActor(waterActor);
+renderer.addActor(waterActor);
+renderer.addActor(waterSActor);
 renderer.getActiveCamera().elevation(300);
 renderer.getActiveCamera().computeDistance();
 renderer.resetCamera();
@@ -266,24 +338,18 @@ renderWindow.render();
 //actor.getProperty().setWireframe(true);
 
 
+
 window.setInterval(function(){
 	waterPolyData = vtkPolyData.newInstance();
 	fluidData.anim_time += 1;
 
-	if (fluidData.anim_time  === ANIM_ITER / 2){
-		ap.add_n_droplet(fluidData, mapData, 1);
-	}
-
-	//console.log("anim_time :", fluidData.anim_time);
 	if (fluidData.anim_time < ANIM_ITER)
 		update_water(fluidData, mapData);
-	display_water_particles(fluidData,waterPolyData);
-//	waterMapper.setInputConnection(droplet.getOutputPort());
-	waterActor.setMapper(waterMapper);
-	renderer.addActor(waterActor);
+	display_n_droplets(fluidData,waterPolyData);
+	let test = test_spheres();
 
-	waterFilter.setInputData(fluidData.droplets.getOutputPort());
-	waterMapper.setInputConnection(waterFilter.getOutputPort());
+	render_water(test, waterMapper, waterActor, waterFilter, renderer);
+	render_waters(waterPolyData, waterSMapper, waterSActor, waterSFilter, renderer);
 	renderWindow.render();
 }, 1);
 
@@ -295,7 +361,10 @@ global.mapActor = mapActor;
 global.mapMapper = mapMapper;
 global.waterActor = waterActor;
 global.waterMapper = waterMapper;
+global.waterSActor = waterSActor;
+global.wateSrMapper = waterSMapper;
 global.waterPolyData = waterPolyData;
+global.waterFilter = waterFilter;
 global.polyData = polyData;
 global.mapData = mapData;
 global.fluidData = fluidData;
