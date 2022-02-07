@@ -1,25 +1,71 @@
-import {Ball, Vector3} from './SPH2.js'
+import {Particle, Particle2, Vector3} from './SPH2.js'
 
 
 function get_rand11() {
 	return 2 * Math.random() - 1;
 }
 
+function get_rand_int(size) {
+	return Math.floor(Math.random() * size);
+}
+
 function init_particle_pos(mapData, n) {
-	let pos = new Vector3(Math.round(mapData.size_world / (n + 1)), Math.round(mapData.size_world / (n + 1)), 20);
-	let old_pos = new Vector3(pos.x, pos.y, pos.z);
-	let ball = new Ball(pos, old_pos, 1, 0, 10);
+	let x = Math.round(mapData.size_world / (n + 1));
+	let y = Math.round(mapData.size_world / (n + 1));
+	console.log('x', x);
+	console.log('y', y);
+	let pos = new Vector3(x, y, 20);
+	console.log('pos', pos);
+	let old_pos = new Vector3(x, y, 20);
+	let ball = new Particle(pos, old_pos, 1, 0, 10);
+	console.log('ball', ball);
+	console.log('ball pos', ball.pos);
 	return (ball);
 }
 
-export function add_n_droplet(fluidData, mapData, n) {
-	for (let i = 0; i < n; i++) {
-		let waterDroplet = init_particle_pos(mapData, i);
-		console.log('wD', waterDroplet);
+function init_particle_pos_rand(mapData) {
+	let x = get_rand_int(mapData.size_world);
+	let y = get_rand_int(mapData.size_world);
+	let pos = new Vector3(
+		x,  
+		y,  
+		20);
+	let old_pos = new Vector3(pos.x, pos.y, pos.z);
+	let p = new Particle(pos, old_pos, 1, 0, 1);
+	return p;
+}
+
+function init_particle_pos_rand_maxi_bestof(mapData) {
+	let x = get_rand_int(mapData.size_world);
+	let y = get_rand_int(mapData.size_world);
+	let pos = new Vector3(
+		x,  
+		y,  
+		20);
+	let old_pos = new Vector3(pos.x, pos.y, pos.z);
+	let p = new Particle(pos, old_pos, 1, 0, 1);
+	return p; 
+
+	// a faire avec particle 2 cf tuto 3
+}
+
+export function add_rain(fluidData, mapData, intensity) {
+	for (let i = 0; i < intensity; i++) {
+		let waterDroplet = init_particle_pos_rand(mapData);
 		fluidData.fluid_array.push(waterDroplet);
 	}
+}
 
-	fluidData.droplets.setNumberOfPoints(n);
+export function add_n_droplet(fluidData, mapData, n) {
+	for (let i = 1; i <= n; i++) {
+		/*
+		let waterDroplet = init_particle_pos(mapData, i);
+		console.log('wD', waterDroplet);
+		console.log('wD pos', waterDroplet.pos);
+		fluidData.fluid_array.push(waterDroplet);
+		*/
+		fluidData.fluid_array.push(init_particle_pos(mapData, i));
+	}
 	/*
 	let maxr = 0.1;
 	let radius = maxr + maxr * (1 - get_rand11() * get_rand11());
