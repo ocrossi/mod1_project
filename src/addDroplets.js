@@ -35,23 +35,62 @@ function init_particle_pos_rand(mapData) {
 	return p;
 }
 
-function init_particle_pos_rand_maxi_bestof(mapData) {
+function init_particle_pos_rand2(mapData) {
 	let x = get_rand_int(mapData.size_world);
 	let y = get_rand_int(mapData.size_world);
 	let pos = new Vector3(
 		x,  
 		y,  
 		20);
-	let old_pos = new Vector3(pos.x, pos.y, pos.z);
-	let p = new Particle(pos, old_pos, 1, 0, 1);
-	return p; 
-
-	// a faire avec particle 2 cf tuto 3
+	let old_pos = new Vector3((pos.x + 0.001 * Math.random()),
+														(pos.y + 0.001 * Math.random()),
+														(pos.z + 0.001 * Math.random()));
+	let force = new Vector3(0, 0, 0);
+	let vel = new Vector3(0, 0, 0);
+	let sigma = 0.1;
+	let beta = 0;
+	let radius = 1;
+	let p = new Particle2(pos, old_pos, vel, force, radius, 1, 0, 0, 0, 0, sigma, beta);
+	return p;
 }
+
+function init_particle_pos2(mapData, n) {
+	let x = Math.round(mapData.size_world / (n + 1));
+	let y = Math.round(mapData.size_world / (n + 1));
+	let pos = new Vector3(
+		x,  
+		y,  
+		20);
+	let old_pos = new Vector3((pos.x + 0.001 * Math.random()),
+														(pos.y + 0.001 * Math.random()),
+														(pos.z + 0.001 * Math.random()));
+	let force = new Vector3(0, 0, 0);
+	let vel = new Vector3(0, 0, 0);
+	let sigma = 0.1;
+	let beta = 0;
+	let radius = 1;
+	let p = new Particle2(pos, old_pos, vel, force, radius, 1, 0, 0, 0, 0, sigma, beta);
+	return p;
+}
+
 
 export function add_rain(fluidData, mapData, intensity) {
 	for (let i = 0; i < intensity; i++) {
 		let waterDroplet = init_particle_pos_rand(mapData);
+		fluidData.fluid_array.push(waterDroplet);
+	}
+}
+
+export function add_rain2(fluidData, mapData, intensity) {
+	for (let i = 0; i < intensity; i++) {
+		let waterDroplet = init_particle_pos_rand2(mapData);
+		fluidData.fluid_array.push(waterDroplet);
+	}
+}
+
+export function add_n_droplet2(fluidData, mapData, n) {
+	for (let i = 1; i <= n; i++) {
+		let waterDroplet = init_particle_pos2(mapData, i);
 		fluidData.fluid_array.push(waterDroplet);
 	}
 }

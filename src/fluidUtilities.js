@@ -19,6 +19,6 @@ export function render_waters(data, mapper, actor, filter) {
 	filter.setInputData(data);
 	mapper.setInputData(filter.getOutputData());
 	actor.setMapper(mapper);
-	mapper.setRadius(1);
+	mapper.setRadius(0.5);
 }
 

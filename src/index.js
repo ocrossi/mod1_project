@@ -86,8 +86,9 @@ function main() {
 
 	console.log('fArr', fluidData.fluid_array);
 
-	let n = 3;
-	ap.add_n_droplet(fluidData, mapData, n);
+	//ap.add_n_droplet(fluidData, mapData, n);
+//	ap.add_rain2(fluidData, mapData, 4);
+	ap.add_n_droplet2(fluidData, mapData, 1);
 
 //	console.log('after add 1 droplet ');
 //	console.log('pos :', fluidData.fluid_array[0].pos);
@@ -230,23 +231,26 @@ renderer.resetCamera();
 renderWindow.render();
 
 
-let ANIM_ITER = 300;
+let ANIM_ITER = 5000;
 let TS = 1;
 
 window.setInterval(function(){
 	fluidData.anim_time += TS;
 
 	if (fluidData.anim_time < ANIM_ITER) {
-		if (fluidData.anim_time % 100 === 0 && fluidData.fluid_array.length < fluidData.max_particles)
-			ap.add_rain(fluidData, mapData, 8); // last param nb of particles to add
-		if (fluidData.anim_time === 500)
-			ap.add_n_droplet(fluidData, mapData, 3);
+		if (fluidData.anim_time % 2 === 0 && fluidData.fluid_array.length < fluidData.max_particles) {
+			//ap.add_rain(fluidData, mapData, 8); // last param nb of particles to add
+			//ap.add_rain2(fluidData, mapData, 4)
+			//ap.add_n_droplet2(fluidData, mapData, 1);
+		}
+	//	if (fluidData.anim_time === 500)
+	//		ap.add_n_droplet(fluidData, mapData, 3);
 		update_water(fluidData, mapData);
 		add_water_data(fluidData, waterPolyData);
 		render_waters(waterPolyData, waterSMapper, waterActor, waterFilter);
 	}
 	renderWindow.render();
-}, TS);
+}, 100);
 
 
 global.renderWindow = renderWindow;

@@ -164,7 +164,7 @@ let rsq = r*r;
 
 
 
-
+let nbt = 0;
 
 function simulate3(fluidData, mapData) {
 // UPDATE
@@ -173,51 +173,72 @@ function simulate3(fluidData, mapData) {
 	// For later use in the simulation. 
 
 	// For each fluidData.fluid_array i ...
-	for(let i = 0; i < fluidData.fluid_array.length; ++i)
-	{
+	for (let i = 0; i < fluidData.fluid_array.length; ++i) {
 		// Normal verlet stuff
-		fluidData.fluid_array[i].old_pos = fluidData.fluid_array[i].pos;
-		fluidData.fluid_array[i].pos += fluidData.fluid_array[i].vel;
+		fluidData.fluid_array[i].old_pos = new Vector3(
+			fluidData.fluid_array[i].pos.x,
+			fluidData.fluid_array[i].pos.y,
+			fluidData.fluid_array[i].pos.z
+		);
+		fluidData.fluid_array[i].pos = fluidData.fluid_array[i].vel.add(fluidData.fluid_array[i].pos);
 
 		// Apply the currently accumulated forces
-		fluidData.fluid_array[i].pos += fluidData.fluid_array[i].force;
+		fluidData.fluid_array[i].pos = fluidData.fluid_array[i].force.add(fluidData.fluid_array[i].pos);
 
 		// Restart the forces with gravity only. We'll add the rest later.
 		fluidData.fluid_array[i].force = new Vector3(0, 0, -G);
 
 		// Calculate the velocity for later.
-		fluidData.fluid_array[i].vel = fluidData.fluid_array[i].pos - fluidData.fluid_array[i].old_pos;
+		fluidData.fluid_array[i].vel = fluidData.fluid_array[i].pos.subtract(fluidData.fluid_array[i].old_pos);
 
 		// If the velocity is really high, we're going to cheat and cap it.
 		// This will not damp all motion. It's not physically-based at all. Just
 		// a little bit of a hack.
 		let max_vel = 2;
-		let vel_mag = fluidData.fluid_array[i].vel.len2();
+		let vel_mag = fluidData.fluid_array[i].vel.magnitude_squared();
 		// If the velocity is greater than the max velocity, then cut it in half.
-		if(vel_mag > max_vel*max_vel)
-			fluidData.fluid_array[i].vel = fluidData.fluid_array[i].vel.scale_this(0.5);
+		if(vel_mag > max_vel * max_vel)
+			fluidData.fluid_array[i].vel.scale_this(0.5);
 
 		// If the particle is outside the bounds of the world, then
 		// Make a little spring force to push it back in.
-		if(fluidData.fluid_array[i].pos.x < 0) fluidData.fluid_array[i].force.x -= (fluidData.fluid_array[i].pos.x) / 8;
-		if(fluidData.fluid_array[i].pos.x >  mapData.size_world) fluidData.fluid_array[i].force.x -= (fluidData.fluid_array[i].pos.x - mapData.size_world) / 8;
-		if(fluidData.fluid_array[i].pos.y < 0) fluidData.fluid_array[i].force.y -= (fluidData.fluid_array[i].pos.y) / 8;
-		if(fluidData.fluid_array[i].pos.y > mapData.size_world) fluidData.fluid_array[i].force.y -= (fluidData.fluid_array[i].pos.y - mapData.size_world * 2) / 8;
+		/*
+		if(fluidData.fluid_array[i].pos.x < 0)
+			fluidData.fluid_array[i].force.x -= (fluidData.fluid_array[i].pos.x) / 8;
+		if(fluidData.fluid_array[i].pos.x >  mapData.size_world)
+			fluidData.fluid_array[i].force.x -= (fluidData.fluid_array[i].pos.x - mapData.size_world) / 8;
+		if(fluidData.fluid_array[i].pos.y < 0)
+			fluidData.fluid_array[i].force.y -= (fluidData.fluid_array[i].pos.y) / 8;
+		if(fluidData.fluid_array[i].pos.y > mapData.size_world)
+			fluidData.fluid_array[i].force.y -= (fluidData.fluid_array[i].pos.y - mapData.size_world * 2) / 8;
 
-		if (fluidData.fluid_array[i].pos.z < 0) fluidDatafluid_array[i].pos.z = 0; // a revoir pour les bounds z axis
-		// Handle the mouse attractor. 
-		// It's a simple spring based attraction to where the mouse is.
-		// 
-		 /*
-		float attr_dist2 = (fluidData.fluid_array[i].pos - attractor).len2();
-		const float attr_l = SIM_W/4;
-		if( attracting )
-			if( attr_dist2 < attr_l*attr_l )
-				fluidData.fluid_array[i].force -= (fluidData.fluid_array[i].pos - attractor) / 256;
-	
-		*/
+		if (isNaN(tx)) {
+			console.log('wsh x', nbt);
+			console.log(fluidData.fluid_array[i]);
+		}
+		else nbt++;
+		if (isNaN(ty)) {
+			console.log('wsh y');
+			console.log(fluidData.fluid_array[i]);
+		}
+
+		
+		bounds_z[1] = 20; // temp just for this test
+
+		if (fluidData.fluid_array[i].pos.z < bounds_z[0]) fluidData.fluid_array[i].pos.z = bounds_z[0]; // a revoir pour les bounds z axis
+		if (fluidData.fluid_array[i].pos.z > bounds_z[1]) fluidData.fluid_array[i].pos.z = bounds_z[1]; // a revoir pour les bounds z axis
+		// checker spring force
+		*/ 
+		let tx = Math.round(fluidData.fluid_array[i].pos.x);
+		let ty = Math.round(fluidData.fluid_array[i].pos.y);
+
+		let bounds_z = sphelper.bounds_z(tx, ty, mapData);
+		sphelper.terrain_collision(fluidData.fluid_array[i], bounds_z, mapData);
+		// no mouse handle interactor for now
+		
 		// Reset the nessecary items.
-		fluidData.fluid_array[i].rho = fluidData.fluid_array[i].rho_near = 0;
+		fluidData.fluid_array[i].rho = 0;
+		fluidData.fluid_array[i].rho_near = 0;
 		fluidData.fluid_array[i].neighbors = [];
 	}
     
@@ -227,8 +248,7 @@ function simulate3(fluidData, mapData) {
 	// of the distances of neighboring fluidData.fluid_array within the radius of support (r)
 
 	// For each particle ...
-	for(let i=0; i < fluidData.fluid_array.length; ++i)
-	{
+	for (let i = 0; i < fluidData.fluid_array.length; ++i) {
 		fluidData.fluid_array[i].rho = fluidData.fluid_array[i].rho_near = 0;
 
 		// We will sum up the 'near' and 'far' densities.
@@ -236,8 +256,7 @@ function simulate3(fluidData, mapData) {
 		let dn = 0;
 
 		// Now look at every other particle
-		for(let j=0; j < fluidData.fluid_array.length; ++j)
-		{
+		for (let j = 0; j < fluidData.fluid_array.length; ++j) {
 			// We only want to look at each pair of fluidData.fluid_array just once. 
 			// And do not calculate an interaction for a particle with itself!
 			if(j >= i) continue;
@@ -267,12 +286,8 @@ function simulate3(fluidData, mapData) {
 				fluidData.fluid_array[j].rho_near += q3;
 
 				// Set up the neighbor list for faster access later.
-				let n = new Neighbor();
-				n.i = i; 
-				n.j = j;
-				n.q = q; 
-				n.q2 = q2;              
-				fluidData.fluid_array[i].neighbors.push_back(n);
+				let n = new Neighbor(i, j, q, q2);
+				fluidData.fluid_array[i].neighbors.push(n);
 			}
 		}
 
@@ -283,8 +298,7 @@ function simulate3(fluidData, mapData) {
 	// PRESSURE
 	//
 	// Make the simple pressure calculation from the equation of state.
-	for(let i = 0; i < fluidData.fluid_array.length; ++i)
-	{
+	for(let i = 0; i < fluidData.fluid_array.length; ++i) {
 		fluidData.fluid_array[i].press = k * (fluidData.fluid_array[i].rho - rest_density);
 		fluidData.fluid_array[i].press_near = k_near * fluidData.fluid_array[i].rho_near;
 	}
@@ -297,17 +311,16 @@ function simulate3(fluidData, mapData) {
 	// For each particle ...
 	for(let i=0; i < fluidData.fluid_array.length; ++i)
 	{
-		let dX = new Vector3();
+		let dX = new Vector3(0, 0, 0);
 
 		// For each of the neighbors
 		let ncount = fluidData.fluid_array[i].neighbors.length;
-		for(let ni=0; ni < ncount; ++ni)
-		{
+		for (let ni = 0; ni < ncount; ++ni) {
 			let cn = fluidData.fluid_array[i].neighbors[ni];
 			let n = new Neighbor(cn.i, cn.j, cn.q1, cn.q2);
 			let j = n.j;
 			let q = n.q;
-			let q2 = n.q2;       
+			let q2 = n.q2;   
 
 			// The vector from particle i to particle j
 			let rij = fluidData.fluid_array[j].pos.subtract(fluidData.fluid_array[i].pos);
@@ -323,7 +336,7 @@ function simulate3(fluidData, mapData) {
 			fluidData.fluid_array[j].force.add_to_this(D);
 		}
 
-		fluidData.fluid_array[i].force.subtract_to_this(dX);
+		fluidData.fluid_array[i].force.subtract_from_this(dX);
 	}
 
 	// VISCOSITY
@@ -334,11 +347,9 @@ function simulate3(fluidData, mapData) {
 	// Try it.
 
 	// For each particle
-	for(let i=0; i < fluidData.fluid_array.length; ++i)
-	{
+	for (let i = 0; i < fluidData.fluid_array.length; ++i) {
 		// For each of that fluidData.fluid_array neighbors
-		for(let ni=0; ni < fluidData.fluid_array[i].neighbors.length; ++ni)
-		{
+		for (let ni = 0; ni < fluidData.fluid_array[i].neighbors.length; ++ni) {
 			let cn = fluidData.fluid_array[i].neighbors[ni];
 			let n = new Neighbor(cn.i, cn.j, cn.q1, cn.q2);
 
@@ -348,22 +359,17 @@ function simulate3(fluidData, mapData) {
 
 			let rijn = rij.divide_scalar(l);
 			// Get the projection of the velocities onto the vector between them.
-			let tempu = fluidData.fluid_array[n.i].vel.multiply(fluidData.fluid_array[n.j].vel);
-			let u = tempu.multiply(rijn);
+			let tempu = fluidData.fluid_array[n.i].vel.subtract(fluidData.fluid_array[n.j].vel);
+			let u = tempu.magnitude_squared(rijn);
 			if(u > 0)
 			{
 				// Calculate the viscosity impulse between the two fluidData.fluid_array
 				// based on the quadratic function of projected length
-				let t1 = u.multiply(fluidData.fluid_array[n.j].sigma);
-				let usq = u.multiply(u);
-				let t2 = usq.multiply(fluidData.fluid_array[n.j].beta);
-				t2.add_to_this(t1);
-				t2.scale_this(1 - q);
-				let I = t2.multiply(rijn);
-				
+				let temp = (1 - q) * (fluidData.fluid_array[n.j].sigma * u + fluidData.fluid_array[n.j].beta * u * u);
+				let I = rijn.scale(temp);				
 				// Apply the impulses on the two fluidData.fluid_array
 				I.scale_this(0.5);
-				fluidData.fluid_array[n.i].vel.subtract_to_this(I);
+				fluidData.fluid_array[n.i].vel.subtract_from_this(I);
 				fluidData.fluid_array[n.j].vel.add_to_this(I);
 			}
 
@@ -372,12 +378,68 @@ function simulate3(fluidData, mapData) {
 }
 
 
+function simulate_3_1(fluidData, mapData) {
+// UPDATE
+	//
+	// This modified verlet integrator has dt = 1 and calculates the velocity
+	// For later use in the simulation. 
+
+	// For each fluidData.fluid_array i ...
+	for (let i = 0; i < fluidData.fluid_array.length; ++i) {
+		// Normal verlet stuff
+		fluidData.fluid_array[i].old_pos = new Vector3(
+			fluidData.fluid_array[i].pos.x,
+			fluidData.fluid_array[i].pos.y,
+			fluidData.fluid_array[i].pos.z
+		);
+		fluidData.fluid_array[i].pos = fluidData.fluid_array[i].vel.add(fluidData.fluid_array[i].pos);
+
+		// Apply the currently accumulated forces
+		fluidData.fluid_array[i].pos = fluidData.fluid_array[i].force.add(fluidData.fluid_array[i].pos);
+
+		// Restart the forces with gravity only. We'll add the rest later.
+		fluidData.fluid_array[i].force = new Vector3(0, 0, -G);
+
+		// Calculate the velocity for later.
+		fluidData.fluid_array[i].vel = fluidData.fluid_array[i].pos.subtract(fluidData.fluid_array[i].old_pos);
+
+		// If the velocity is really high, we're going to cheat and cap it.
+		// This will not damp all motion. It's not physically-based at all. Just
+		// a little bit of a hack.
+		let max_vel = 2;
+		let vel_mag = fluidData.fluid_array[i].vel.magnitude_squared();
+		// If the velocity is greater than the max velocity, then cut it in half.
+		if(vel_mag > max_vel * max_vel)
+			fluidData.fluid_array[i].vel.scale_this(0.5);
+
+		// If the particle is outside the bounds of the world, then
+		// Make a little spring force to push it back in.
+
+		let bounds_z = sphelper.bounds_z(tx, ty, mapData);
+		sphelper.terrain_collision(fluidData.fluid_array[i], bounds_z, mapData);
+		// no mouse handle interactor for now
+		
+		// Reset the nessecary items.
+		fluidData.fluid_array[i].rho = 0;
+		fluidData.fluid_array[i].rho_near = 0;
+		fluidData.fluid_array[i].neighbors = [];
+	}
+
+}
+
+
 function update_water(fluidData, mapData) {
 	//console.log('TBD', fluidData);
-	//simulate1(fluidData, mapData);
-	simulate2(fluidData, mapData);
+	simulate1(fluidData, mapData);
+	//simulate2(fluidData, mapData);
+	//simulate3-1(fluidData, mapData);
 
-	//console.log('after simulate water step nb ', fluidData.anim_time);
+	console.group();
+	console.log('after simulate water step nb ', fluidData.anim_time);
+	console.log('result particles');
+	console.log(fluidData.fluid_array);
+	console.groupEnd();
+	
 	//console.log(fluidData.fluid_array[0]);
 	//console.log(fluidData.fluid_array[0].pos);
 	//console.log(fluidData.fluid_array[0].old_pos);

@@ -2,18 +2,19 @@ PARSING
 
 probleme parsing si (x, y, z1) (x, y, z2)
 soit considerer uniquement le pt le plus haut, sinon erreur
-check extension fichier === .mod1
 
 
 MAP GENERATION
-implementer map algo avec random hills
-implementer maps en noise
-ajouter map swap dans UI
+implementer map algo avec random hills 
 
 WATER
-generer tableau ints pour representer map en 3D
-test cas d utilisation de memoires sur grosses maps
+--> somme des forces exterieures
+1 - tester SPH 1 particle only gravity & terrain collision
+2 - tester SPH collisions entre 2 particles
 
-REFACTO
-fonctions affichage et pipeline vtk
-class sph a simplifier
+--> somme des forces du fluide
+3 - tester SPH n particles densite
+4 - tester SPH n particles pression
+5 - tester SPH n particles visco pr le final
+
+
