@@ -47,22 +47,24 @@ export function terrain_collision(cp, bounds_z, mapData) {
 		cp.force.y -= cp.pos.y  / 8;
 	}
 	if(cp.pos.y > mapData.size_world) {
-		cp.force.y = mapData.size_world;
+		cp.pos.y = mapData.size_world;
 		cp.force.y -= (cp.pos.y - mapData.size_world) / 8;
 	}
 	bounds_z[1] = 20; // temp just for this test
 
 	if (cp.pos.z < bounds_z[0]) {
 		let z_sf = cp.pos.z / 8;
-		console.count('ca creuse');
-		console.log('pos', cp.pos);
-		console.log('vel', cp.vel);
-		console.log('spring force', z_sf);
 		cp.force.z += z_sf;
-	}//cp.pos.z = bounds_z[0]; // a revoir pour les bounds z axis
-	//if (cp.pos.z > bounds_z[1]) {
-	//	console.count('pete le plafond dis');
-	//	cp.force.z -= (cp.pos.z - mapData.highest) / 8;
-	//}// cp.pos.z = bounds_z[1]; // a revoir pour les bounds z axis
+		cp.pos.z  = bounds_z[0];
+		let normal = mapData.normals[Math.round(cp.pos.x) * mapData.size_world + Math.round(cp.pos.y)];
 
+		cp.force.x += normal.normal[0];
+		cp.force.y += normal.normal[1];
+		cp.force.z += normal.normal[2];
+		console.log('normal ? ', normal);
+		console.log('points ? ', cp.pos.x);
+		console.log('points ? ', cp.pos.y);
+		console.log('points ? ', cp.pos.z);
+
+	}
 }

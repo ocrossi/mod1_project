@@ -415,7 +415,9 @@ function simulate_3_1(fluidData, mapData) {
 		let tx = Math.round(fluidData.fluid_array[i].pos.x);
 		let ty = Math.round(fluidData.fluid_array[i].pos.y);
 
-		let bounds_z = sphelper.bounds_z(tx, ty, mapData);
+		let bounds_z = [0, 0];
+		if (tx >= 0 && ty  >= 0 && tx < mapData.size_world && ty <= mapData.size_world)
+			bounds_z = sphelper.bounds_z(tx, ty, mapData);
 		sphelper.terrain_collision(fluidData.fluid_array[i], bounds_z, mapData);
 		// no mouse handle interactor for now
 		
@@ -433,12 +435,13 @@ function update_water(fluidData, mapData) {
 	simulate_3_1(fluidData, mapData);
 	//simulate2(fluidData, mapData);
 	//simulate3-1(fluidData, mapData);
-
+/*
 	console.group();
 	console.log('after simulate water step nb ', fluidData.anim_time);
 	console.log('result particles');
 	console.log(fluidData.fluid_array);
 	console.groupEnd();
+	*/
 }
 
 export default update_water;

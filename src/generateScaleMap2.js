@@ -1,5 +1,7 @@
 import vtkTriangle from "@kitware/vtk.js/Common/DataModel/Triangle";
 
+
+let  inv  = true;
 function compute_normal(tab, polyData) {
 	let points = polyData.getPoints().getData();
 	let p1 = [
@@ -19,6 +21,11 @@ function compute_normal(tab, polyData) {
 	];
 	let normal = [0, 0, 0];
 	vtkTriangle.computeNormal(p1, p2, p3, normal);
+	if (inv === true) {
+		normal[0] *= -1;
+		normal[1] *= -1;
+		normal[2] *= -1;
+	}
 	return normal;
 }
 

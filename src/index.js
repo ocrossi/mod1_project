@@ -231,7 +231,7 @@ renderer.resetCamera();
 renderWindow.render();
 
 
-let ANIM_ITER = 5000;
+let ANIM_ITER = 200;
 let TS = 1;
 
 window.setInterval(function(){

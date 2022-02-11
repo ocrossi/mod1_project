@@ -90,7 +90,7 @@ export function add_rain2(fluidData, mapData, intensity) {
 
 export function add_n_droplet2(fluidData, mapData, n) {
 	for (let i = 1; i <= n; i++) {
-		let waterDroplet = init_particle_pos2(mapData, i);
+		let waterDroplet = init_particle_pos2(mapData, 2);
 		fluidData.fluid_array.push(waterDroplet);
 	}
 }
