@@ -164,8 +164,6 @@ let rsq = r*r;
 
 
 
-let nbt = 0;
-
 function simulate3(fluidData, mapData) {
 // UPDATE
 	//
@@ -414,6 +412,8 @@ function simulate_3_1(fluidData, mapData) {
 
 		// If the particle is outside the bounds of the world, then
 		// Make a little spring force to push it back in.
+		let tx = Math.round(fluidData.fluid_array[i].pos.x);
+		let ty = Math.round(fluidData.fluid_array[i].pos.y);
 
 		let bounds_z = sphelper.bounds_z(tx, ty, mapData);
 		sphelper.terrain_collision(fluidData.fluid_array[i], bounds_z, mapData);
@@ -430,7 +430,7 @@ function simulate_3_1(fluidData, mapData) {
 
 function update_water(fluidData, mapData) {
 	//console.log('TBD', fluidData);
-	simulate1(fluidData, mapData);
+	simulate_3_1(fluidData, mapData);
 	//simulate2(fluidData, mapData);
 	//simulate3-1(fluidData, mapData);
 
@@ -439,11 +439,6 @@ function update_water(fluidData, mapData) {
 	console.log('result particles');
 	console.log(fluidData.fluid_array);
 	console.groupEnd();
-	
-	//console.log(fluidData.fluid_array[0]);
-	//console.log(fluidData.fluid_array[0].pos);
-	//console.log(fluidData.fluid_array[0].old_pos);
-
 }
 
 export default update_water;

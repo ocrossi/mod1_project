@@ -34,27 +34,22 @@ export function compute_verlet_integration(pos, old_pos, accel, dt) {
 }
 
 export function terrain_collision(cp, bounds_z, mapData) {
-		if(cp.pos.x < 0)
-			cp.force.x -= (cp.pos.x) / 8;
-		if(cp.pos.x > mapData.size_world)
-			cp.force.x -= (cp.pos.x - mapData.size_world) / 8;
-		if(cp.pos.y < 0)
-			cp.force.y -= cp.pos.y  / 8;
-		if(cp.pos.y > mapData.size_world)
-			cp.force.y -= (cp.pos.y - mapData.size_world) / 8;
-
-
-/*		if (isNaN(tx)) {
-			console.log('wsh x', nbt);
-			console.log(cp);
-		}
-		else nbt++;
-		if (isNaN(ty)) {
-			console.log('wsh y');
-			console.log(cp);
-		}
-*/
-		
+	if(cp.pos.x < 0) {
+		cp.pos.x = 0;
+		cp.force.x -= (cp.pos.x) / 8;
+	}
+	if (cp.pos.x > mapData.size_world) {
+		cp.pos.x = mapData.size_world;
+		cp.force.x -= (cp.pos.x - mapData.size_world) / 8;
+	}
+	if(cp.pos.y < 0) {
+		cp.pos.y = 0;
+		cp.force.y -= cp.pos.y  / 8;
+	}
+	if(cp.pos.y > mapData.size_world) {
+		cp.force.y = mapData.size_world;
+		cp.force.y -= (cp.pos.y - mapData.size_world) / 8;
+	}
 	bounds_z[1] = 20; // temp just for this test
 
 	if (cp.pos.z < bounds_z[0]) {
