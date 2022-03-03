@@ -17,4 +17,5 @@ WATER
 4 - tester SPH n particles pression
 5 - tester SPH n particles visco pr le final
 
-
+voir pour enlever setInterval pour requestAnimation 
+--> https://stackoverflow.com/questions/38709923/why-is-requestanimationframe-better-than-setinterval-or-settimeout

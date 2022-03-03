@@ -1,8 +1,8 @@
 import {Vector3} from './SPH2.js'
 
 export function bounds_z(x, y, mapData) {
-	//console.log('x', x);
-	//console.log('y', y);
+	console.log('x', x);
+	console.log('y', y);
 	if (x === 0) x++;
 	if (y === 0) y++;
 	let ground = mapData.height_map[x][y];
@@ -61,10 +61,11 @@ export function terrain_collision(cp, bounds_z, mapData) {
 		cp.force.x += normal.normal[0];
 		cp.force.y += normal.normal[1];
 		cp.force.z += normal.normal[2];
+		/*
 		console.log('normal ? ', normal);
 		console.log('points ? ', cp.pos.x);
 		console.log('points ? ', cp.pos.y);
 		console.log('points ? ', cp.pos.z);
-
+*/
 	}
 }

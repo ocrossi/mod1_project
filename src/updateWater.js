@@ -1,3 +1,4 @@
+import { writeSTL } from '@kitware/vtk.js/IO/Geometry/STLWriter';
 import {Neighbor, Particle, Vector3} from './SPH2.js'
 import * as sphelper from './SPHhelpers.js'
 
@@ -8,68 +9,6 @@ function compute_gravity(cp) {
 	return force;
 }
 
-function simulate1(fluidData, mapData) {
-	let ts = 0.01;
-
-	for (let i = 0; i < fluidData.fluid_array.length; i++) {
-		let cp = fluidData.fluid_array[i];
-
-		let force = compute_gravity(cp);
- // mass * gravity strength
-		//console.log('force after g', force);
-		// A little freebie: We'd also like to add some resistance to our system. We can 
-		// create a "damping" force that acts in the direction opposite of our motion.
-		//let vel = new (p.pos - p.old_pos) / h;		
-		let vel = cp.pos.subtract(cp.old_pos);
-		//console.log('vel', vel);
-		vel.divide_scalar(ts);
-
-		// Add our damping force
-		let damp =  1;
-		vel.scale_this(-damp);
-		force.add_to_this(vel);
-
-		// Acceleration
-		let accel = force.divide_scalar(cp.mass);
-
-		//console.log('force 3', force);
-		//console.log('vel', vel);
-		//console.log('acce;', accel);
-		// Use Verlet to movce the particle forward in time.
-		// We have to store the current position like this
-		// So that we can update the "old position" correctly afterwards.
-		let temp = new Vector3(cp.pos.x, cp.pos.y, cp.pos.z);
-		sphelper.compute_verlet_integration(cp.pos, cp.old_pos, accel, ts);
-	
-		//console.log('after verlet');
-		//console.log(cp.pos);
-
-		cp.old_pos = temp;
-		//console.log()
-
-		cp.vel = new Vector3(vel.x, vel.y, vel.z);
-		let bounds_xy = [0, mapData.size_world];
-		//console.log('boundsx', bounds_xy);
-		//console.log('boundsy', bounds_xy);
-		//console.log('boundsz', bounds_z);
-	//	cp.pos.x = Math.max(Math.min(cp.pos.x, bounds_xy[1] + cp.radius), bounds_xy[0] - cp.radius);
-	//	cp.pos.y = Math.max(Math.min(cp.pos.y, bounds_xy[1] + cp.radius), bounds_xy[0] - cp.radius);
-	//	cp.pos.z = Math.max(Math.min(cp.pos.z, bounds_z[1] + cp.radius), bounds_z[0] - cp.radius);
-		//cp.pos.y = Math.max(Math.min(cp.pos.y, bounds_xy[1] - cp.radius), bounds_xy[0] + cp.radius);
-		cp.pos.x = Math.floor(Math.min(Math.max(cp.pos.x, bounds_xy[0] + 1), bounds_xy[1] - 1));
-		cp.pos.y = Math.floor(Math.min(Math.max(cp.pos.y, bounds_xy[0] + 1), bounds_xy[1] - 1));
-		let bounds_z = sphelper.bounds_z(cp.pos.x, cp.pos.y, mapData);
-		cp.pos.z = Math.max(cp.pos.z, bounds_z[0] + cp.radius);
-
-		//console.log('end of  loop in simulate 1 :');
-		//console.log(cp.pos);
-		//console.log(cp.old_pos);
-		//console.log(cp.vel);
-		//console.log(cp.radius);
-		//console.log(cp.mass);
-
-	}
-}
 
 function quick_sqrt(a, x) {
 	return (x + (a - x*x) / (2*x))
@@ -85,7 +24,7 @@ function simulate2(fluidData, mapData) { // eclate
 		let begin = new Vector3(cp.pos.x, cp.pos.y, cp.pos.z);
 		// part 1 : forces & numerical integration
 		let mass = 2;
-		cp.mass = mass; //mmouais
+		cp.mass = mass; //mmouais15G
 		/* Gravitational Force = mass * Constant * Direction */
 		let force = compute_gravity(cp);
 		force.divide_scalar_this(2); //apparament sa div par 2 ici jsp pq		
@@ -397,7 +336,8 @@ function simulate_3_1(fluidData, mapData) {
 
 		// Restart the forces with gravity only. We'll add the rest later.
 		fluidData.fluid_array[i].force = new Vector3(0, 0, -G);
-
+		//fluidData.fluid_array[i].force = compute_gravity(fluidData.fluid_array[i]);
+		
 		// Calculate the velocity for later.
 		fluidData.fluid_array[i].vel = fluidData.fluid_array[i].pos.subtract(fluidData.fluid_array[i].old_pos);
 
@@ -429,12 +369,68 @@ function simulate_3_1(fluidData, mapData) {
 
 }
 
+function simulate1(fluidData, mapData) {
+	let ts = 0.01;
+
+	for (let i = 0; i < fluidData.fluid_array.length; i++) {
+		let cp = fluidData.fluid_array[i];
+
+		let force = compute_gravity(cp);
+ // mass * gravity strength
+		//console.log('force after g', force);
+		// A little freebie: We'd also like to add some resistance to our system. We can 
+		// create a "damping" force that acts in the direction opposite of our motion.
+		//let vel = new (p.pos - p.old_pos) / h;		
+		let vel = cp.pos.subtract(cp.old_pos);
+		//console.log('vel', vel);
+		vel.divide_scalar(ts);
+
+		// Add our damping force
+		let damp =  1;
+		vel.scale_this(-damp);
+		force.add_to_this(vel);
+
+		// Acceleration
+		let accel = force.divide_scalar(cp.mass);
+
+		//console.log('force 3', force);
+		//console.log('vel', vel);
+		//console.log('acce;', accel);
+		// Use Verlet to movce the particle forward in time.
+		// We have to store the current position like this
+		// So that we can update the "old position" correctly afterwards.
+		let temp = new Vector3(cp.pos.x, cp.pos.y, cp.pos.z);
+		sphelper.compute_verlet_integration(cp.pos, cp.old_pos, accel, ts);
+		cp.old_pos = temp;
+		//console.log()
+
+		cp.vel = new Vector3(vel.x, vel.y, vel.z);
+
+/* version originale 
+		let bounds_xy = [0, mapData.size_world];
+		cp.pos.x = Math.floor(Math.min(Math.max(cp.pos.x, bounds_xy[0] + 1), bounds_xy[1] - 1));
+		cp.pos.y = Math.floor(Math.min(Math.max(cp.pos.y, bounds_xy[0] + 1), bounds_xy[1] - 1));
+		let bounds_z = sphelper.bounds_z(cp.pos.x, cp.pos.y, mapData);
+		cp.pos.z = Math.max(cp.pos.z, bounds_z[0] + cp.radius);
+*/
+		// cf simu3
+		let tx = Math.round(cp.pos.x);
+		let ty = Math.round(cp.pos.y);
+
+		let bounds_z = [0, 0];
+		if (tx >= 0 && ty  >= 0 && tx < mapData.size_world && ty <= mapData.size_world)
+			bounds_z = sphelper.bounds_z(tx, ty, mapData);
+		sphelper.terrain_collision(fluidData.fluid_array[i], bounds_z, mapData);
+
+	}
+}
+
 
 function update_water(fluidData, mapData) {
 	//console.log('TBD', fluidData);
-	simulate_3_1(fluidData, mapData);
+	//simulate1(fluidData, mapData);
 	//simulate2(fluidData, mapData);
-	//simulate3-1(fluidData, mapData);
+	simulate3(fluidData, mapData);
 /*
 	console.group();
 	console.log('after simulate water step nb ', fluidData.anim_time);

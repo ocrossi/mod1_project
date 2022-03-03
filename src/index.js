@@ -17,6 +17,7 @@ const { FieldDataTypes } = vtkDataSet;
 
 import controlPanel from "./controlPanel.html";
 import inputFile from "raw-loader!../resources/demoO.mod1";
+//import inputFile from "raw-loader!../resources/demo4.mod1";
 
 import parse_input from "./parsing.js";
 import change_map_dimensions from "./changeMapDimensions.js";
@@ -67,8 +68,8 @@ let mapData = {
 	input: "", // only for parsing, could be destroyed afterwards
 	file_name: "",
 	noise_map: false,
-	combine_heats: false,
-	square_flattening: false,
+	combine_heats: true,
+	square_flattening: true,
 	sigmoid_flattening: false,
 	reset_map: false
 };
@@ -84,15 +85,8 @@ function main() {
 	generate_heat_map2(mapData);
 	generate_map2(mapData, polyData);
 
-	console.log('fArr', fluidData.fluid_array);
-
-	//ap.add_n_droplet(fluidData, mapData, n);
-//	ap.add_rain2(fluidData, mapData, 4);
-	ap.add_n_droplet2(fluidData, mapData, 1);
-
-//	console.log('after add 1 droplet ');
-//	console.log('pos :', fluidData.fluid_array[0].pos);
-//	console.log("old_pos :", fluidData.fluid_array[0].old_pos);
+	//ap.add_n_droplet2(fluidData, mapData, 1);
+	ap.add_rain2(fluidData, mapData, 10);
 	add_water_data(fluidData, waterPolyData);
 }
 
@@ -231,7 +225,7 @@ renderer.resetCamera();
 renderWindow.render();
 
 
-let ANIM_ITER = 200;
+let ANIM_ITER = 5;
 let TS = 1;
 
 window.setInterval(function(){
@@ -250,7 +244,7 @@ window.setInterval(function(){
 		render_waters(waterPolyData, waterSMapper, waterActor, waterFilter);
 	}
 	renderWindow.render();
-}, 100);
+}, 10);
 
 
 global.renderWindow = renderWindow;
